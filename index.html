@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>交流の回転ベクトル</title>
+<style>
+:root{--bg:#f6f4ee;--ink:#23262b;--muted:#6b6f76;--btn:#ecebe4;--panel:#fff;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#15181b;--ink:#e8e9e6;--muted:#9aa0a6;--btn:#272c31;--panel:#1d2125;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px 16px;border-bottom:1px solid rgba(128,128,128,.25)}
+nav .name{font-weight:700;font-size:1rem}
+.tabs{display:inline-flex;background:var(--btn);border-radius:10px;padding:4px;gap:4px}
+.tab{font:inherit;font-weight:700;border:0;background:transparent;color:var(--muted);padding:7px 18px;border-radius:7px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.tab:focus-visible{outline:2px solid #1f9e78;outline-offset:2px}
+iframe[hidden]{display:none}
+iframe{display:block;width:100%;border:0;height:1200px}
+</style></head><body>
+<nav><span class="name">交流の回転ベクトル</span><div class="tabs" role="tablist"><button type="button" class="tab" data-k="resistor" aria-selected="false" role="tab">抵抗</button><button type="button" class="tab" data-k="coil" aria-selected="false" role="tab">コイル</button><button type="button" class="tab" data-k="capacitor" aria-selected="false" role="tab">コンデンサー</button></div></nav>
+<iframe id="f-resistor" title="抵抗の回転ベクトル" srcdoc="&lt;!doctype html&gt;&lt;html lang=&quot;ja&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;style&gt;html{color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}&lt;/style&gt;&lt;title&gt;回転ベクトルと交流波形&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&amp;family=Noto+Serif:ital,wght@1,500&amp;display=swap&quot;&gt;
+&lt;style&gt;
+:root{
+  --bg:#f6f4ee; --panel:#ffffff; --ink:#23262b; --muted:#6b6f76; --line:#d9d6cc; --axis:#3a3d42;
+  --v:#1f9e78; --v-soft:rgba(31,158,120,.14);
+  --i:#e25b1f; --i-soft:rgba(226,91,31,.14);
+  --arc:#f2c48d;
+  --btn:#ecebe4;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme=&quot;light&quot;]){
+    --bg:#15181b; --panel:#1d2125; --ink:#e8e9e6; --muted:#9aa0a6; --line:#343a40; --axis:#c9ccd0;
+    --v:#3cc99c; --v-soft:rgba(60,201,156,.18);
+    --i:#ff8048; --i-soft:rgba(255,128,72,.18);
+    --arc:#8a6231; --btn:#272c31;
+    color-scheme:dark;
+  }
+}
+:root[data-theme=&quot;dark&quot;]{
+  --bg:#15181b; --panel:#1d2125; --ink:#e8e9e6; --muted:#9aa0a6; --line:#343a40; --axis:#c9ccd0;
+  --v:#3cc99c; --v-soft:rgba(60,201,156,.18);
+  --i:#ff8048; --i-soft:rgba(255,128,72,.18);
+  --arc:#8a6231; --btn:#272c31;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--ink);font-family:&quot;Zen Kaku Gothic New&quot;,&quot;Hiragino Sans&quot;,&quot;Yu Gothic&quot;,sans-serif;font-size:15px;line-height:1.7;padding:24px 16px 40px}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-size:1.45rem;margin:0;text-wrap:balance;font-weight:700;letter-spacing:.02em}
+.lead{margin:0;color:var(--muted);max-width:62ch}
+.m{font-family:&quot;Noto Serif&quot;,&quot;Times New Roman&quot;,serif;font-style:italic;font-weight:500}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+.seg{display:inline-flex;background:var(--btn);border-radius:10px;padding:4px;gap:4px}
+.seg button{font:inherit;font-weight:700;font-size:1rem;border:0;background:transparent;color:var(--muted);padding:8px 22px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed=&quot;true&quot;]{background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.seg button[data-mode=&quot;V&quot;][aria-pressed=&quot;true&quot;]{color:var(--v)}
+.seg button[data-mode=&quot;I&quot;][aria-pressed=&quot;true&quot;]{color:var(--i)}
+.seg button[data-mode=&quot;B&quot;][aria-pressed=&quot;true&quot;]{color:var(--ink)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--v);outline-offset:2px}
+.play{font:inherit;font-weight:700;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 16px;border-radius:8px;cursor:pointer;min-width:7.5em}
+.speed{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.9rem}
+.speed select{font:inherit;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;overflow-x:auto}
+svg{display:block;width:100%;min-width:640px;height:auto;touch-action:none}
+.slider{display:flex;align-items:center;gap:12px}
+.slider label{white-space:nowrap;font-weight:500}
+.slider input{flex:1;accent-color:var(--ink)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.card .k{font-size:.8rem;color:var(--muted);letter-spacing:.06em}
+.card .val{font-size:1.15rem;font-variant-numeric:tabular-nums}
+.card.v .val{color:var(--v)} .card.i .val{color:var(--i)}
+.notes{margin:0;padding-left:1.2em;color:var(--ink);max-width:70ch}
+.notes li{margin:.2em 0}
+svg text{font-family:&quot;Noto Serif&quot;,&quot;Times New Roman&quot;,serif;font-style:italic;fill:var(--ink)}
+svg text.jp{font-family:&quot;Zen Kaku Gothic New&quot;,sans-serif;font-style:normal}
+&lt;/style&gt;
+
+&lt;div class=&quot;wrap&quot;&gt;
+  &lt;header&gt;
+    &lt;h1&gt;抵抗の回転ベクトルと交流の波形&lt;/h1&gt;
+    &lt;p class=&quot;lead&quot;&gt;抵抗に流れる交流の電圧・電流を回転ベクトルで表します。ベクトルが角度 &lt;span class=&quot;m&quot;&gt;ωt&lt;/span&gt; だけ回ったとき、その &lt;span class=&quot;m&quot;&gt;y&lt;/span&gt; 成分が右のグラフの値になります。&lt;/p&gt;
+  &lt;/header&gt;
+
+  &lt;div class=&quot;toolbar&quot;&gt;
+    &lt;div class=&quot;seg&quot; role=&quot;group&quot; aria-label=&quot;表示する量&quot;&gt;
+      &lt;button type=&quot;button&quot; data-mode=&quot;V&quot; aria-pressed=&quot;true&quot;&gt;電圧&lt;/button&gt;
+      &lt;button type=&quot;button&quot; data-mode=&quot;I&quot; aria-pressed=&quot;false&quot;&gt;電流&lt;/button&gt;
+      &lt;button type=&quot;button&quot; data-mode=&quot;B&quot; aria-pressed=&quot;false&quot;&gt;両方&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;button type=&quot;button&quot; class=&quot;play&quot; id=&quot;play&quot;&gt;❚❚ 一時停止&lt;/button&gt;
+    &lt;div class=&quot;speed&quot;&gt;&lt;label for=&quot;spd&quot;&gt;速さ&lt;/label&gt;
+      &lt;select id=&quot;spd&quot;&gt;
+        &lt;option value=&quot;8&quot;&gt;ゆっくり&lt;/option&gt;
+        &lt;option value=&quot;5&quot; selected&gt;ふつう&lt;/option&gt;
+        &lt;option value=&quot;2.5&quot;&gt;はやい&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;stage&quot;&gt;
+    &lt;svg id=&quot;svg&quot; viewBox=&quot;0 0 900 400&quot; aria-label=&quot;回転ベクトルと波形のグラフ&quot;&gt;&lt;/svg&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;slider&quot;&gt;
+    &lt;label for=&quot;theta&quot;&gt;&lt;span class=&quot;m&quot;&gt;ωt&lt;/span&gt; を動かす&lt;/label&gt;
+    &lt;input type=&quot;range&quot; id=&quot;theta&quot; min=&quot;0&quot; max=&quot;1000&quot; value=&quot;0&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;readout&quot;&gt;
+    &lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;k&quot;&gt;回転角&lt;/div&gt;&lt;div class=&quot;val&quot; id=&quot;rAng&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;card v&quot; id=&quot;cardV&quot;&gt;&lt;div class=&quot;k&quot;&gt;電圧の瞬時値&lt;/div&gt;&lt;div class=&quot;val&quot; id=&quot;rV&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;card i&quot; id=&quot;cardI&quot;&gt;&lt;div class=&quot;k&quot;&gt;電流の瞬時値&lt;/div&gt;&lt;div class=&quot;val&quot; id=&quot;rI&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;ul class=&quot;notes&quot;&gt;
+    &lt;li&gt;回転ベクトルの長さ = 最大値（&lt;span class=&quot;m&quot;&gt;V&lt;/span&gt;&lt;sub&gt;R0&lt;/sub&gt;, &lt;span class=&quot;m&quot;&gt;I&lt;/span&gt;&lt;sub&gt;R0&lt;/sub&gt;）、回転の角速度 = &lt;span class=&quot;m&quot;&gt;ω&lt;/span&gt;&lt;/li&gt;
+    &lt;li&gt;ベクトルの先端から横に引いた点線が、グラフ上のその時刻の点につながります。&lt;/li&gt;
+    &lt;li&gt;抵抗では電圧と電流のベクトルが同じ向きにそろって回る（位相が同じ）ことを「両方」で確認できます。&lt;/li&gt;
+    &lt;li&gt;グラフやベクトルの円をドラッグしても角度を動かせます。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+(function(){
+  const NS=&quot;http://www.w3.org/2000/svg&quot;;
+  const svg=document.getElementById(&quot;svg&quot;);
+  const cx=190, cy=200, x0=400, xEnd=880;
+  const R={V:150,I:95};
+  const k=380/(2*Math.PI);           // px per rad on the graph
+  const TMAX=(xEnd-10-x0)/k;         // max angle drawn
+  const col={V:&quot;var(--v)&quot;,I:&quot;var(--i)&quot;};
+  const soft={V:&quot;var(--v-soft)&quot;,I:&quot;var(--i-soft)&quot;};
+  let mode=&quot;V&quot;, theta=0, playing=!matchMedia(&quot;(prefers-reduced-motion: reduce)&quot;).matches, period=5;
+
+  function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const a in attrs)e.setAttribute(a,attrs[a]);(parent||svg).appendChild(e);return e;}
+  function txt(s,x,y,attrs,parent){const t=el(&quot;text&quot;,Object.assign({x,y},attrs||{}),parent);t.textContent=s;return t;}
+
+  // defs: arrowheads
+  const defs=el(&quot;defs&quot;,{});
+  [&quot;V&quot;,&quot;I&quot;].forEach(q=&gt;{
+    const m=el(&quot;marker&quot;,{id:&quot;ah&quot;+q,viewBox:&quot;0 0 10 10&quot;,refX:&quot;8&quot;,refY:&quot;5&quot;,markerWidth:&quot;5&quot;,markerHeight:&quot;5&quot;,orient:&quot;auto-start-reverse&quot;},defs);
+    el(&quot;path&quot;,{d:&quot;M0,0 L10,5 L0,10 z&quot;,fill:col[q]},m);
+  });
+  const m2=el(&quot;marker&quot;,{id:&quot;ax&quot;,viewBox:&quot;0 0 10 10&quot;,refX:&quot;8&quot;,refY:&quot;5&quot;,markerWidth:&quot;7&quot;,markerHeight:&quot;7&quot;,orient:&quot;auto&quot;},defs);
+  el(&quot;path&quot;,{d:&quot;M0,1 L10,5 L0,9 z&quot;,fill:&quot;var(--axis)&quot;},m2);
+
+  // static axes
+  el(&quot;line&quot;,{x1:25,y1:cy,x2:360,y2:cy,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  el(&quot;line&quot;,{x1:cx,y1:375,x2:cx,y2:22,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  txt(&quot;x&quot;,352,222); txt(&quot;y&quot;,200,30); txt(&quot;O&quot;,cx-22,cy+22,{style:&quot;font-style:normal&quot;});
+  el(&quot;line&quot;,{x1:x0,y1:cy,x2:xEnd+10,y2:cy,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  el(&quot;line&quot;,{x1:x0,y1:375,x2:x0,y2:22,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  txt(&quot;t&quot;,xEnd+2,222); txt(&quot;O&quot;,x0-22,cy+22,{style:&quot;font-style:normal&quot;});
+  // period ticks on t axis
+  const tickLbl=[&quot;T/4&quot;,&quot;T/2&quot;,&quot;3T/4&quot;,&quot;T&quot;,&quot;5T/4&quot;];
+  for(let n=1;n&lt;=4;n++){const x=x0+k*n*Math.PI/2; if(x&gt;xEnd) break;
+    el(&quot;line&quot;,{x1:x,y1:cy-4,x2:x,y2:cy+4,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1});
+    txt(tickLbl[n-1],x-12,cy+20,{&quot;font-size&quot;:12,fill:&quot;var(--muted)&quot;,style:&quot;fill:var(--muted)&quot;});}
+
+  // per-quantity layers
+  const L={};
+  [&quot;V&quot;,&quot;I&quot;].forEach(q=&gt;{
+    const g=el(&quot;g&quot;,{});
+    const r=R[q];
+    L[q]={g,
+      circle:el(&quot;circle&quot;,{cx,cy,r,fill:&quot;none&quot;,stroke:col[q],&quot;stroke-width&quot;:1.4},g),
+      guideTop:el(&quot;line&quot;,{x1:cx,y1:cy-r,x2:xEnd,y2:cy-r,stroke:col[q],&quot;stroke-width&quot;:1,&quot;stroke-dasharray&quot;:&quot;5 5&quot;,opacity:.55},g),
+      guideBot:el(&quot;line&quot;,{x1:cx,y1:cy+r,x2:xEnd,y2:cy+r,stroke:col[q],&quot;stroke-width&quot;:1,&quot;stroke-dasharray&quot;:&quot;5 5&quot;,opacity:.55},g),
+      ghost:el(&quot;path&quot;,{fill:&quot;none&quot;,stroke:col[q],&quot;stroke-width&quot;:1.5,opacity:.22},g),
+      trace:el(&quot;path&quot;,{fill:&quot;none&quot;,stroke:col[q],&quot;stroke-width&quot;:3.2,&quot;stroke-linecap&quot;:&quot;round&quot;},g),
+      comp:el(&quot;line&quot;,{stroke:col[q],&quot;stroke-width&quot;:5,&quot;stroke-linecap&quot;:&quot;round&quot;,opacity:.45},g),
+      proj:el(&quot;line&quot;,{stroke:col[q],&quot;stroke-width&quot;:1.4,&quot;stroke-dasharray&quot;:&quot;6 4&quot;},g),
+      drop:el(&quot;line&quot;,{stroke:col[q],&quot;stroke-width&quot;:1,&quot;stroke-dasharray&quot;:&quot;3 4&quot;,opacity:.8},g),
+      vec:el(&quot;line&quot;,{x1:cx,y1:cy,stroke:col[q],&quot;stroke-width&quot;:4,&quot;marker-end&quot;:&quot;url(#ah&quot;+q+&quot;)&quot;},g),
+      tipDot:el(&quot;circle&quot;,{r:4.5,fill:col[q]},g),
+      dot:el(&quot;circle&quot;,{r:6,fill:col[q],stroke:&quot;var(--panel)&quot;,&quot;stroke-width&quot;:2},g),
+      label:txt(&quot;&quot;,0,0,{&quot;font-size&quot;:20,style:&quot;fill:&quot;+col[q]},g)
+    };
+    // ghost full curve
+    let d=&quot;&quot;;for(let a=0;a&lt;=TMAX;a+=0.02){d+=(a?&quot;L&quot;:&quot;M&quot;)+(x0+k*a).toFixed(1)+&quot;,&quot;+(cy-r*Math.sin(a)).toFixed(1);}
+    L[q].ghost.setAttribute(&quot;d&quot;,d);
+  });
+  // angle arc
+  const arc=el(&quot;path&quot;,{fill:&quot;var(--arc)&quot;,opacity:.55});
+  const arcLine=el(&quot;path&quot;,{fill:&quot;none&quot;,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.3});
+  const arcLbl=txt(&quot;ωt&quot;,0,0,{&quot;font-size&quot;:18});
+  const tLbl=txt(&quot;t&quot;,0,0,{&quot;font-size&quot;:17});
+  // bring vectors on top of arc
+  svg.appendChild(L.I.g); svg.appendChild(L.V.g);
+  // formula labels on graph
+  const fV=txt(&quot;&quot;,0,0,{&quot;font-size&quot;:17,style:&quot;fill:var(--v)&quot;}), fI=txt(&quot;&quot;,0,0,{&quot;font-size&quot;:17,style:&quot;fill:var(--i)&quot;});
+  fV.innerHTML=&#x27;V&lt;tspan font-size=&quot;12&quot; dy=&quot;4&quot;&gt;R&lt;/tspan&gt;&lt;tspan dy=&quot;-4&quot;&gt; = V&lt;/tspan&gt;&lt;tspan font-size=&quot;12&quot; dy=&quot;4&quot;&gt;R0&lt;/tspan&gt;&lt;tspan dy=&quot;-4&quot;&gt; sin ωt&lt;/tspan&gt;&#x27;;
+  fI.innerHTML=&#x27;I&lt;tspan font-size=&quot;12&quot; dy=&quot;4&quot;&gt;R&lt;/tspan&gt;&lt;tspan dy=&quot;-4&quot;&gt; = I&lt;/tspan&gt;&lt;tspan font-size=&quot;12&quot; dy=&quot;4&quot;&gt;R0&lt;/tspan&gt;&lt;tspan dy=&quot;-4&quot;&gt; sin ωt&lt;/tspan&gt;&#x27;;
+  fV.setAttribute(&quot;x&quot;,700);fV.setAttribute(&quot;y&quot;,36);fI.setAttribute(&quot;x&quot;,700);fI.setAttribute(&quot;y&quot;,60);
+
+  const rAng=document.getElementById(&quot;rAng&quot;),rV=document.getElementById(&quot;rV&quot;),rI=document.getElementById(&quot;rI&quot;);
+  const slider=document.getElementById(&quot;theta&quot;);
+
+  function render(){
+    const vis={V:mode!==&quot;I&quot;,I:mode!==&quot;V&quot;};
+    const s=Math.sin(theta),c=Math.cos(theta);
+    const gx=x0+k*theta;
+    [&quot;V&quot;,&quot;I&quot;].forEach(q=&gt;{
+      const o=L[q],r=R[q];
+      o.g.style.display=vis[q]?&quot;&quot;:&quot;none&quot;;
+      const tx=cx+r*c, ty=cy-r*s;
+      o.vec.setAttribute(&quot;x2&quot;,cx+(r-3)*c); o.vec.setAttribute(&quot;y2&quot;,cy-(r-3)*s);
+      o.tipDot.setAttribute(&quot;cx&quot;,tx);o.tipDot.setAttribute(&quot;cy&quot;,ty);
+      o.comp.setAttribute(&quot;x1&quot;,tx);o.comp.setAttribute(&quot;y1&quot;,cy);o.comp.setAttribute(&quot;x2&quot;,tx);o.comp.setAttribute(&quot;y2&quot;,ty);
+      o.proj.setAttribute(&quot;x1&quot;,tx);o.proj.setAttribute(&quot;y1&quot;,ty);o.proj.setAttribute(&quot;x2&quot;,gx);o.proj.setAttribute(&quot;y2&quot;,ty);
+      o.drop.setAttribute(&quot;x1&quot;,gx);o.drop.setAttribute(&quot;y1&quot;,ty);o.drop.setAttribute(&quot;x2&quot;,gx);o.drop.setAttribute(&quot;y2&quot;,cy);
+      o.dot.setAttribute(&quot;cx&quot;,gx);o.dot.setAttribute(&quot;cy&quot;,ty);
+      let d=&quot;&quot;;const step=0.02;for(let a=0;a&lt;theta;a+=step){d+=(a?&quot;L&quot;:&quot;M&quot;)+(x0+k*a).toFixed(1)+&quot;,&quot;+(cy-r*Math.sin(a)).toFixed(1);}
+      d+=(d?&quot;L&quot;:&quot;M&quot;)+gx.toFixed(1)+&quot;,&quot;+ty.toFixed(1);
+      o.trace.setAttribute(&quot;d&quot;,d);
+      // vector label near tip
+      const lx=cx+(r+22)*c, ly=cy-(r+22)*s;
+      o.label.setAttribute(&quot;x&quot;,lx-10);o.label.setAttribute(&quot;y&quot;,ly+7);
+      o.label.innerHTML=(q===&quot;V&quot;?&quot;V&quot;:&quot;I&quot;)+&#x27;&lt;tspan font-size=&quot;13&quot; dy=&quot;4&quot; style=&quot;font-style:normal&quot;&gt;R&lt;/tspan&gt;&#x27;;
+    });
+    // offset labels when both shown so they don&#x27;t collide
+    if(mode===&quot;B&quot;){const o=L.I;const lx=cx+(R.I-30)*c+14*s, ly=cy-(R.I-30)*s+14*c; o.label.setAttribute(&quot;x&quot;,lx-10);o.label.setAttribute(&quot;y&quot;,ly+7);}
+    fV.style.display=mode!==&quot;I&quot;?&quot;&quot;:&quot;none&quot;; fI.style.display=mode!==&quot;V&quot;?&quot;&quot;:&quot;none&quot;;
+    if(mode===&quot;I&quot;) fI.setAttribute(&quot;y&quot;,36); else fI.setAttribute(&quot;y&quot;,60);
+    // arc
+    const ar=38, a=theta%(2*Math.PI), big=a&gt;Math.PI?1:0;
+    const ex=cx+ar*Math.cos(a), ey=cy-ar*Math.sin(a);
+    if(a&lt;0.001){arc.setAttribute(&quot;d&quot;,&quot;&quot;);arcLine.setAttribute(&quot;d&quot;,&quot;&quot;);}
+    else{arc.setAttribute(&quot;d&quot;,`M${cx},${cy} L${cx+ar},${cy} A${ar},${ar} 0 ${big} 0 ${ex},${ey} Z`);
+      arcLine.setAttribute(&quot;d&quot;,`M${cx+ar},${cy} A${ar},${ar} 0 ${big} 0 ${ex},${ey}`);}
+    const ha=a/2, lr=ar+18;
+    arcLbl.setAttribute(&quot;x&quot;,cx+lr*Math.cos(ha)-8);arcLbl.setAttribute(&quot;y&quot;,cy-lr*Math.sin(ha)+6);
+    arcLbl.style.display=a&gt;0.35?&quot;&quot;:&quot;none&quot;;
+    tLbl.setAttribute(&quot;x&quot;,gx-4);tLbl.setAttribute(&quot;y&quot;,cy+(s&gt;=0?38:-12));
+    // readouts
+    const deg=theta*180/Math.PI;
+    rAng.innerHTML=`&lt;span class=&quot;m&quot;&gt;ωt&lt;/span&gt; = ${deg.toFixed(0)}°`+(deg&gt;=360?`（${(deg%360).toFixed(0)}° と同じ向き）`:&quot;&quot;)+`　&lt;span style=&quot;color:var(--muted);font-size:.9rem&quot;&gt;t = ${(theta/(2*Math.PI)).toFixed(2)} T&lt;/span&gt;`;
+    const sv=(s&gt;=0?&quot;+&quot;:&quot;−&quot;)+Math.abs(s).toFixed(2);
+    rV.innerHTML=`&lt;span class=&quot;m&quot;&gt;V&lt;/span&gt;&lt;sub&gt;R&lt;/sub&gt; = ${sv} &lt;span class=&quot;m&quot;&gt;V&lt;/span&gt;&lt;sub&gt;R0&lt;/sub&gt;`;
+    rI.innerHTML=`&lt;span class=&quot;m&quot;&gt;I&lt;/span&gt;&lt;sub&gt;R&lt;/sub&gt; = ${sv} &lt;span class=&quot;m&quot;&gt;I&lt;/span&gt;&lt;sub&gt;R0&lt;/sub&gt;`;
+    document.getElementById(&quot;cardV&quot;).style.opacity=mode===&quot;I&quot;?.35:1;
+    document.getElementById(&quot;cardI&quot;).style.opacity=mode===&quot;V&quot;?.35:1;
+    slider.value=Math.round(theta/TMAX*1000);
+  }
+
+  // mode buttons
+  document.querySelectorAll(&quot;.seg button&quot;).forEach(b=&gt;b.addEventListener(&quot;click&quot;,()=&gt;{
+    mode=b.dataset.mode;
+    document.querySelectorAll(&quot;.seg button&quot;).forEach(x=&gt;x.setAttribute(&quot;aria-pressed&quot;,x===b?&quot;true&quot;:&quot;false&quot;));
+    render();
+  }));
+  const playBtn=document.getElementById(&quot;play&quot;);
+  function setPlay(p){playing=p;playBtn.textContent=p?&quot;❚❚ 一時停止&quot;:&quot;▶ 再生&quot;;last=null;}
+  playBtn.addEventListener(&quot;click&quot;,()=&gt;setPlay(!playing));
+  document.getElementById(&quot;spd&quot;).addEventListener(&quot;change&quot;,e=&gt;{period=+e.target.value;});
+  slider.addEventListener(&quot;input&quot;,()=&gt;{setPlay(false);theta=slider.value/1000*TMAX;render();});
+
+  // drag on svg: circle area -&gt; angle, graph area -&gt; time
+  function svgPt(ev){const p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+  let dragging=false;
+  function dragTo(ev){
+    const p=svgPt(ev);
+    if(p.x&gt;=x0){theta=Math.min(TMAX,Math.max(0,(p.x-x0)/k));}
+    else{let a=Math.atan2(cy-p.y,p.x-cx); if(a&lt;0)a+=2*Math.PI;
+      // keep in the same turn as current theta when possible
+      const turn=Math.floor(theta/(2*Math.PI)); let t2=turn*2*Math.PI+a;
+      if(t2-theta&gt;Math.PI)t2-=2*Math.PI; if(theta-t2&gt;Math.PI)t2+=2*Math.PI;
+      theta=Math.min(TMAX,Math.max(0,t2));}
+    render();
+  }
+  svg.addEventListener(&quot;pointerdown&quot;,ev=&gt;{dragging=true;setPlay(false);svg.setPointerCapture(ev.pointerId);dragTo(ev);});
+  svg.addEventListener(&quot;pointermove&quot;,ev=&gt;{if(dragging)dragTo(ev);});
+  svg.addEventListener(&quot;pointerup&quot;,()=&gt;dragging=false);
+  svg.addEventListener(&quot;pointercancel&quot;,()=&gt;dragging=false);
+
+  let last=null;
+  function loop(ts){
+    if(playing){
+      if(last!==null){theta+=(ts-last)/1000*(2*Math.PI/period); if(theta&gt;TMAX)theta=0;}
+      last=ts; render();
+    } else last=null;
+    requestAnimationFrame(loop);
+  }
+  setPlay(playing);
+  if(!playing) theta=Math.PI/5;
+  render();
+  requestAnimationFrame(loop);
+})();
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;" hidden></iframe><iframe id="f-coil" title="コイルの回転ベクトル" srcdoc="&lt;!doctype html&gt;&lt;html lang=&quot;ja&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;style&gt;html{color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}&lt;/style&gt;&lt;title&gt;コイルの回転ベクトル&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&amp;family=Noto+Serif:ital,wght@1,500&amp;display=swap&quot;&gt;
+&lt;style&gt;
+:root{
+  --bg:#f6f4ee; --panel:#ffffff; --ink:#23262b; --muted:#6b6f76; --line:#d9d6cc; --axis:#3a3d42;
+  --v:#1f9e78; --i:#e25b1f; --arc:#f2c48d; --ph:#6b5bd2; --btn:#ecebe4;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme=&quot;light&quot;]){
+    --bg:#15181b; --panel:#1d2125; --ink:#e8e9e6; --muted:#9aa0a6; --line:#343a40; --axis:#c9ccd0;
+    --v:#3cc99c; --i:#ff8048; --arc:#8a6231; --ph:#a99bff; --btn:#272c31;
+    color-scheme:dark;
+  }
+}
+:root[data-theme=&quot;dark&quot;]{
+  --bg:#15181b; --panel:#1d2125; --ink:#e8e9e6; --muted:#9aa0a6; --line:#343a40; --axis:#c9ccd0;
+  --v:#3cc99c; --i:#ff8048; --arc:#8a6231; --ph:#a99bff; --btn:#272c31;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--ink);font-family:&quot;Zen Kaku Gothic New&quot;,&quot;Hiragino Sans&quot;,&quot;Yu Gothic&quot;,sans-serif;font-size:15px;line-height:1.7;padding:24px 16px 40px}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-size:1.45rem;margin:0;text-wrap:balance;font-weight:700;letter-spacing:.02em}
+.lead{margin:0;color:var(--muted);max-width:66ch}
+.m{font-family:&quot;Noto Serif&quot;,&quot;Times New Roman&quot;,serif;font-style:italic;font-weight:500}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+.grp{display:flex;align-items:center;gap:8px}
+.grp .cap{font-size:.85rem;color:var(--muted)}
+.seg{display:inline-flex;background:var(--btn);border-radius:10px;padding:4px;gap:4px}
+.seg button{font:inherit;font-weight:700;font-size:1rem;border:0;background:transparent;color:var(--muted);padding:8px 20px;border-radius:7px;cursor:pointer}
+.seg.small button{font-size:.9rem;padding:6px 14px}
+.seg button[aria-pressed=&quot;true&quot;]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.seg button[data-mode=&quot;V&quot;][aria-pressed=&quot;true&quot;],.seg button[data-ref=&quot;V&quot;][aria-pressed=&quot;true&quot;]{color:var(--v)}
+.seg button[data-mode=&quot;I&quot;][aria-pressed=&quot;true&quot;],.seg button[data-ref=&quot;I&quot;][aria-pressed=&quot;true&quot;]{color:var(--i)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--v);outline-offset:2px}
+.play{font:inherit;font-weight:700;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 16px;border-radius:8px;cursor:pointer;min-width:7.5em}
+.speed select{font:inherit;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;overflow-x:auto}
+svg{display:block;width:100%;min-width:640px;height:auto;touch-action:none}
+.slider{display:flex;align-items:center;gap:12px}
+.slider label{white-space:nowrap;font-weight:500}
+.slider input{flex:1;accent-color:var(--ink)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.card .k{font-size:.8rem;color:var(--muted);letter-spacing:.06em}
+.card .val{font-size:1.15rem;font-variant-numeric:tabular-nums}
+.card.v .val{color:var(--v)} .card.i .val{color:var(--i)}
+.key{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--ph);border-radius:10px;padding:10px 14px;font-weight:500}
+.notes{margin:0;padding-left:1.2em;max-width:72ch}
+.notes li{margin:.2em 0}
+svg text{font-family:&quot;Noto Serif&quot;,&quot;Times New Roman&quot;,serif;font-style:italic;fill:var(--ink)}
+&lt;/style&gt;
+
+&lt;div class=&quot;wrap&quot;&gt;
+  &lt;header&gt;
+    &lt;h1&gt;コイルの回転ベクトルと交流の波形&lt;/h1&gt;
+    &lt;p class=&quot;lead&quot;&gt;コイルに流れる交流の電圧・電流を回転ベクトルで表します。ベクトルの &lt;span class=&quot;m&quot;&gt;y&lt;/span&gt; 成分が右のグラフの値です。コイルでは電圧のベクトルが電流のベクトルより &lt;span class=&quot;m&quot;&gt;π&lt;/span&gt;/2 だけ先を回ります。&lt;/p&gt;
+  &lt;/header&gt;
+
+  &lt;div class=&quot;toolbar&quot;&gt;
+    &lt;div class=&quot;seg&quot; role=&quot;group&quot; aria-label=&quot;表示する量&quot;&gt;
+      &lt;button type=&quot;button&quot; data-mode=&quot;V&quot; aria-pressed=&quot;false&quot;&gt;電圧&lt;/button&gt;
+      &lt;button type=&quot;button&quot; data-mode=&quot;I&quot; aria-pressed=&quot;false&quot;&gt;電流&lt;/button&gt;
+      &lt;button type=&quot;button&quot; data-mode=&quot;B&quot; aria-pressed=&quot;true&quot;&gt;両方&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;button type=&quot;button&quot; class=&quot;play&quot; id=&quot;play&quot;&gt;❚❚ 一時停止&lt;/button&gt;
+    &lt;div class=&quot;grp speed&quot;&gt;&lt;label class=&quot;cap&quot; for=&quot;spd&quot;&gt;速さ&lt;/label&gt;
+      &lt;select id=&quot;spd&quot;&gt;
+        &lt;option value=&quot;8&quot;&gt;ゆっくり&lt;/option&gt;
+        &lt;option value=&quot;5&quot; selected&gt;ふつう&lt;/option&gt;
+        &lt;option value=&quot;2.5&quot;&gt;はやい&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;grp&quot;&gt;&lt;span class=&quot;cap&quot;&gt;式の基準&lt;/span&gt;
+      &lt;div class=&quot;seg small&quot; role=&quot;group&quot; aria-label=&quot;式の基準&quot;&gt;
+        &lt;button type=&quot;button&quot; data-ref=&quot;I&quot; aria-pressed=&quot;true&quot;&gt;電流&lt;/button&gt;
+        &lt;button type=&quot;button&quot; data-ref=&quot;V&quot; aria-pressed=&quot;false&quot;&gt;電圧&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;stage&quot;&gt;
+    &lt;svg id=&quot;svg&quot; viewBox=&quot;0 0 900 400&quot; aria-label=&quot;回転ベクトルと波形のグラフ&quot;&gt;&lt;/svg&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;slider&quot;&gt;
+    &lt;label for=&quot;theta&quot;&gt;&lt;span class=&quot;m&quot;&gt;ωt&lt;/span&gt; を動かす&lt;/label&gt;
+    &lt;input type=&quot;range&quot; id=&quot;theta&quot; min=&quot;0&quot; max=&quot;1000&quot; value=&quot;0&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;readout&quot;&gt;
+    &lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;k&quot;&gt;回転角&lt;/div&gt;&lt;div class=&quot;val&quot; id=&quot;rAng&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;card v&quot; id=&quot;cardV&quot;&gt;&lt;div class=&quot;k&quot;&gt;電圧の瞬時値&lt;/div&gt;&lt;div class=&quot;val&quot; id=&quot;rV&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;card i&quot; id=&quot;cardI&quot;&gt;&lt;div class=&quot;k&quot;&gt;電流の瞬時値&lt;/div&gt;&lt;div class=&quot;val&quot; id=&quot;rI&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;key&quot;&gt;コイル：電流の位相は電圧より &lt;span class=&quot;m&quot;&gt;π&lt;/span&gt;/2 &lt;strong&gt;遅れる&lt;/strong&gt;（電圧が &lt;span class=&quot;m&quot;&gt;π&lt;/span&gt;/2 進む）&lt;/div&gt;
+
+  &lt;ul class=&quot;notes&quot;&gt;
+    &lt;li&gt;回転ベクトルの長さ = 最大値、回転の角速度 = &lt;span class=&quot;m&quot;&gt;ω&lt;/span&gt;。ベクトルの &lt;span class=&quot;m&quot;&gt;y&lt;/span&gt; 成分が瞬時値です。&lt;/li&gt;
+    &lt;li&gt;ベクトルの先端から横に引いた点線が、グラフ上のその時刻の点につながります。&lt;/li&gt;
+    &lt;li&gt;紫の弧は電圧と電流のベクトルのなす角（位相差 &lt;span class=&quot;m&quot;&gt;π&lt;/span&gt;/2）です。2本は直角のまま一緒に回ります。&lt;/li&gt;
+    &lt;li&gt;「式の基準」で、電流と電圧のどちらを sin &lt;span class=&quot;m&quot;&gt;ωt&lt;/span&gt; とおくかを切り替えられます（教科書の書き方に合わせてください）。&lt;/li&gt;
+    &lt;li&gt;グラフやベクトルの円をドラッグしても角度を動かせます。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+const CFG={sub:&quot;L&quot;,vLead:Math.PI/2};
+(function(){
+  const NS=&quot;http://www.w3.org/2000/svg&quot;;
+  const svg=document.getElementById(&quot;svg&quot;);
+  const cx=190, cy=200, x0=400, xEnd=880;
+  const R={V:150,I:95};
+  const k=380/(2*Math.PI);
+  const TMAX=(xEnd-10-x0)/k;
+  const col={V:&quot;var(--v)&quot;,I:&quot;var(--i)&quot;};
+  const X=CFG.sub;               // &quot;L&quot; or &quot;C&quot;
+  let mode=&quot;B&quot;, ref=&quot;I&quot;, theta=0, playing=!matchMedia(&quot;(prefers-reduced-motion: reduce)&quot;).matches, period=5;
+  // phase of each quantity relative to the reference (lead = +)
+  function phases(){ // CFG.vLead: phase of V minus phase of I
+    return ref===&quot;I&quot; ? {I:0,V:CFG.vLead} : {V:0,I:-CFG.vLead};
+  }
+
+  function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const a in attrs)e.setAttribute(a,attrs[a]);(parent||svg).appendChild(e);return e;}
+  function txt(s,x,y,attrs,parent){const t=el(&quot;text&quot;,Object.assign({x,y},attrs||{}),parent);t.textContent=s;return t;}
+
+  const defs=el(&quot;defs&quot;,{});
+  [&quot;V&quot;,&quot;I&quot;].forEach(q=&gt;{
+    const m=el(&quot;marker&quot;,{id:&quot;ah&quot;+q,viewBox:&quot;0 0 10 10&quot;,refX:&quot;8&quot;,refY:&quot;5&quot;,markerWidth:&quot;5&quot;,markerHeight:&quot;5&quot;,orient:&quot;auto&quot;},defs);
+    el(&quot;path&quot;,{d:&quot;M0,0 L10,5 L0,10 z&quot;,fill:col[q]},m);
+  });
+  const mx=el(&quot;marker&quot;,{id:&quot;ax&quot;,viewBox:&quot;0 0 10 10&quot;,refX:&quot;8&quot;,refY:&quot;5&quot;,markerWidth:&quot;7&quot;,markerHeight:&quot;7&quot;,orient:&quot;auto&quot;},defs);
+  el(&quot;path&quot;,{d:&quot;M0,1 L10,5 L0,9 z&quot;,fill:&quot;var(--axis)&quot;},mx);
+
+  el(&quot;line&quot;,{x1:25,y1:cy,x2:360,y2:cy,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  el(&quot;line&quot;,{x1:cx,y1:375,x2:cx,y2:22,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  txt(&quot;x&quot;,352,222); txt(&quot;y&quot;,200,30); txt(&quot;O&quot;,cx-22,cy+22,{style:&quot;font-style:normal&quot;});
+  el(&quot;line&quot;,{x1:x0,y1:cy,x2:xEnd+10,y2:cy,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  el(&quot;line&quot;,{x1:x0,y1:375,x2:x0,y2:22,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  txt(&quot;t&quot;,xEnd+2,222); txt(&quot;O&quot;,x0-22,cy+22,{style:&quot;font-style:normal&quot;});
+  const tickLbl=[&quot;T/4&quot;,&quot;T/2&quot;,&quot;3T/4&quot;,&quot;T&quot;];
+  for(let n=1;n&lt;=4;n++){const x=x0+k*n*Math.PI/2;
+    el(&quot;line&quot;,{x1:x,y1:cy-4,x2:x,y2:cy+4,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1});
+    txt(tickLbl[n-1],x-12,cy+20,{&quot;font-size&quot;:12,style:&quot;fill:var(--muted)&quot;});}
+
+  // angle arc (ωt) and reference ray
+  const arc=el(&quot;path&quot;,{fill:&quot;var(--arc)&quot;,opacity:.55});
+  const arcLine=el(&quot;path&quot;,{fill:&quot;none&quot;,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.3});
+  const refRay=el(&quot;line&quot;,{x1:cx,y1:cy,stroke:&quot;var(--muted)&quot;,&quot;stroke-width&quot;:1.3,&quot;stroke-dasharray&quot;:&quot;4 4&quot;});
+  const arcLbl=txt(&quot;ωt&quot;,0,0,{&quot;font-size&quot;:18});
+  const phArc=el(&quot;path&quot;,{fill:&quot;none&quot;,stroke:&quot;var(--ph)&quot;,&quot;stroke-width&quot;:2.2});
+  const phLbl=txt(&quot;π/2&quot;,0,0,{&quot;font-size&quot;:16,style:&quot;fill:var(--ph)&quot;});
+
+  const L={};
+  [&quot;I&quot;,&quot;V&quot;].forEach(q=&gt;{
+    const g=el(&quot;g&quot;,{}), r=R[q];
+    L[q]={g,
+      circle:el(&quot;circle&quot;,{cx,cy,r,fill:&quot;none&quot;,stroke:col[q],&quot;stroke-width&quot;:1.4},g),
+      guideTop:el(&quot;line&quot;,{x1:cx,y1:cy-r,x2:xEnd,y2:cy-r,stroke:col[q],&quot;stroke-width&quot;:1,&quot;stroke-dasharray&quot;:&quot;5 5&quot;,opacity:.55},g),
+      guideBot:el(&quot;line&quot;,{x1:cx,y1:cy+r,x2:xEnd,y2:cy+r,stroke:col[q],&quot;stroke-width&quot;:1,&quot;stroke-dasharray&quot;:&quot;5 5&quot;,opacity:.55},g),
+      ghost:el(&quot;path&quot;,{fill:&quot;none&quot;,stroke:col[q],&quot;stroke-width&quot;:1.5,opacity:.22},g),
+      trace:el(&quot;path&quot;,{fill:&quot;none&quot;,stroke:col[q],&quot;stroke-width&quot;:3.2,&quot;stroke-linecap&quot;:&quot;round&quot;},g),
+      comp:el(&quot;line&quot;,{stroke:col[q],&quot;stroke-width&quot;:5,&quot;stroke-linecap&quot;:&quot;round&quot;,opacity:.45},g),
+      proj:el(&quot;line&quot;,{stroke:col[q],&quot;stroke-width&quot;:1.4,&quot;stroke-dasharray&quot;:&quot;6 4&quot;},g),
+      drop:el(&quot;line&quot;,{stroke:col[q],&quot;stroke-width&quot;:1,&quot;stroke-dasharray&quot;:&quot;3 4&quot;,opacity:.8},g),
+      vec:el(&quot;line&quot;,{x1:cx,y1:cy,stroke:col[q],&quot;stroke-width&quot;:4,&quot;marker-end&quot;:&quot;url(#ah&quot;+q+&quot;)&quot;},g),
+      tipDot:el(&quot;circle&quot;,{r:4.5,fill:col[q]},g),
+      dot:el(&quot;circle&quot;,{r:6,fill:col[q],stroke:&quot;var(--panel)&quot;,&quot;stroke-width&quot;:2},g),
+      label:txt(&quot;&quot;,0,0,{&quot;font-size&quot;:20,style:&quot;fill:&quot;+col[q]},g)
+    };
+    L[q].label.innerHTML=q+&#x27;&lt;tspan font-size=&quot;13&quot; dy=&quot;4&quot; style=&quot;font-style:normal&quot;&gt;&#x27;+X+&#x27;&lt;/tspan&gt;&#x27;;
+  });
+  const tLbl=txt(&quot;t&quot;,0,0,{&quot;font-size&quot;:17});
+  const fV=txt(&quot;&quot;,0,0,{&quot;font-size&quot;:17,style:&quot;fill:var(--v)&quot;}), fI=txt(&quot;&quot;,0,0,{&quot;font-size&quot;:17,style:&quot;fill:var(--i)&quot;});
+
+  function phaseStr(p){ if(Math.abs(p)&lt;1e-9) return &quot; sin ωt&quot;; return p&gt;0?&quot; sin(ωt + π/2)&quot;:&quot; sin(ωt − π/2)&quot;; }
+  function svgFormula(q,p){ return q+&#x27;&lt;tspan font-size=&quot;12&quot; dy=&quot;4&quot; style=&quot;font-style:normal&quot;&gt;&#x27;+X+&#x27;&lt;/tspan&gt;&lt;tspan dy=&quot;-4&quot;&gt; = &#x27;+q+&#x27;&lt;/tspan&gt;&lt;tspan font-size=&quot;12&quot; dy=&quot;4&quot; style=&quot;font-style:normal&quot;&gt;&#x27;+X+&#x27;0&lt;/tspan&gt;&lt;tspan dy=&quot;-4&quot;&gt;&#x27;+phaseStr(p)+&#x27;&lt;/tspan&gt;&#x27;; }
+  function buildStatic(){
+    const ph=phases();
+    [&quot;V&quot;,&quot;I&quot;].forEach(q=&gt;{
+      let d=&quot;&quot;;for(let a=0;a&lt;=TMAX;a+=0.02){d+=(a?&quot;L&quot;:&quot;M&quot;)+(x0+k*a).toFixed(1)+&quot;,&quot;+(cy-R[q]*Math.sin(a+ph[q])).toFixed(1);}
+      L[q].ghost.setAttribute(&quot;d&quot;,d);
+    });
+    fV.innerHTML=svgFormula(&quot;V&quot;,ph.V); fI.innerHTML=svgFormula(&quot;I&quot;,ph.I);
+  }
+
+  const rAng=document.getElementById(&quot;rAng&quot;),rV=document.getElementById(&quot;rV&quot;),rI=document.getElementById(&quot;rI&quot;);
+  const slider=document.getElementById(&quot;theta&quot;);
+
+  function render(){
+    const vis={V:mode!==&quot;I&quot;,I:mode!==&quot;V&quot;};
+    const ph=phases(), gx=x0+k*theta;
+    const val={};
+    [&quot;V&quot;,&quot;I&quot;].forEach(q=&gt;{
+      const o=L[q],r=R[q],a=theta+ph[q],s=Math.sin(a),c=Math.cos(a);
+      val[q]=s;
+      o.g.style.display=vis[q]?&quot;&quot;:&quot;none&quot;;
+      const tx=cx+r*c, ty=cy-r*s;
+      o.vec.setAttribute(&quot;x2&quot;,cx+(r-3)*c); o.vec.setAttribute(&quot;y2&quot;,cy-(r-3)*s);
+      o.tipDot.setAttribute(&quot;cx&quot;,tx);o.tipDot.setAttribute(&quot;cy&quot;,ty);
+      o.comp.setAttribute(&quot;x1&quot;,tx);o.comp.setAttribute(&quot;y1&quot;,cy);o.comp.setAttribute(&quot;x2&quot;,tx);o.comp.setAttribute(&quot;y2&quot;,ty);
+      o.proj.setAttribute(&quot;x1&quot;,tx);o.proj.setAttribute(&quot;y1&quot;,ty);o.proj.setAttribute(&quot;x2&quot;,gx);o.proj.setAttribute(&quot;y2&quot;,ty);
+      o.drop.setAttribute(&quot;x1&quot;,gx);o.drop.setAttribute(&quot;y1&quot;,ty);o.drop.setAttribute(&quot;x2&quot;,gx);o.drop.setAttribute(&quot;y2&quot;,cy);
+      o.dot.setAttribute(&quot;cx&quot;,gx);o.dot.setAttribute(&quot;cy&quot;,ty);
+      let d=&quot;&quot;;for(let b=0;b&lt;theta;b+=0.02){d+=(b?&quot;L&quot;:&quot;M&quot;)+(x0+k*b).toFixed(1)+&quot;,&quot;+(cy-r*Math.sin(b+ph[q])).toFixed(1);}
+      d+=(d?&quot;L&quot;:&quot;M&quot;)+gx.toFixed(1)+&quot;,&quot;+ty.toFixed(1);
+      o.trace.setAttribute(&quot;d&quot;,d);
+      o.label.setAttribute(&quot;x&quot;,cx+(r+22)*c-10);o.label.setAttribute(&quot;y&quot;,cy-(r+22)*s+7);
+    });
+    // ωt arc to reference direction
+    const ar=38, a=theta%(2*Math.PI), big=a&gt;Math.PI?1:0;
+    const ex=cx+ar*Math.cos(a), ey=cy-ar*Math.sin(a);
+    if(a&lt;0.001){arc.setAttribute(&quot;d&quot;,&quot;&quot;);arcLine.setAttribute(&quot;d&quot;,&quot;&quot;);}
+    else{arc.setAttribute(&quot;d&quot;,`M${cx},${cy} L${cx+ar},${cy} A${ar},${ar} 0 ${big} 0 ${ex},${ey} Z`);
+      arcLine.setAttribute(&quot;d&quot;,`M${cx+ar},${cy} A${ar},${ar} 0 ${big} 0 ${ex},${ey}`);}
+    const ha=a/2, lr=ar+16;
+    arcLbl.setAttribute(&quot;x&quot;,cx+lr*Math.cos(ha)-9);arcLbl.setAttribute(&quot;y&quot;,cy-lr*Math.sin(ha)+6);
+    arcLbl.style.display=a&gt;0.4?&quot;&quot;:&quot;none&quot;;
+    // reference ray when the reference vector is hidden
+    refRay.style.display=vis[ref]?&quot;none&quot;:&quot;&quot;;
+    refRay.setAttribute(&quot;x2&quot;,cx+R.V*Math.cos(theta));refRay.setAttribute(&quot;y2&quot;,cy-R.V*Math.sin(theta));
+    // phase-difference arc between the two vectors
+    const showPh=mode===&quot;B&quot;||!vis[ref];
+    phArc.style.display=phLbl.style.display=showPh?&quot;&quot;:&quot;none&quot;;
+    const a1=theta+Math.min(ph.V,ph.I), a2=theta+Math.max(ph.V,ph.I), pr=64;
+    phArc.setAttribute(&quot;d&quot;,`M${cx+pr*Math.cos(a1)},${cy-pr*Math.sin(a1)} A${pr},${pr} 0 0 0 ${cx+pr*Math.cos(a2)},${cy-pr*Math.sin(a2)}`);
+    const am=(a1+a2)/2;
+    phLbl.setAttribute(&quot;x&quot;,cx+(pr+16)*Math.cos(am)-12);phLbl.setAttribute(&quot;y&quot;,cy-(pr+16)*Math.sin(am)+6);
+    // formulas
+    fV.style.display=vis.V?&quot;&quot;:&quot;none&quot;; fI.style.display=vis.I?&quot;&quot;:&quot;none&quot;;
+    fV.setAttribute(&quot;x&quot;,680);fV.setAttribute(&quot;y&quot;,36);
+    fI.setAttribute(&quot;x&quot;,680);fI.setAttribute(&quot;y&quot;,vis.V?60:36);
+    tLbl.setAttribute(&quot;x&quot;,gx-4);tLbl.setAttribute(&quot;y&quot;,cy+38);
+    // readouts
+    const deg=theta*180/Math.PI;
+    rAng.innerHTML=`&lt;span class=&quot;m&quot;&gt;ωt&lt;/span&gt; = ${deg.toFixed(0)}°`+`　&lt;span style=&quot;color:var(--muted);font-size:.9rem&quot;&gt;t = ${(theta/(2*Math.PI)).toFixed(2)} T&lt;/span&gt;`;
+    const f=s=&gt;(s&gt;=-0.005?&quot;+&quot;:&quot;−&quot;)+Math.abs(s).toFixed(2);
+    rV.innerHTML=`&lt;span class=&quot;m&quot;&gt;V&lt;/span&gt;&lt;sub&gt;${X}&lt;/sub&gt; = ${f(val.V)} &lt;span class=&quot;m&quot;&gt;V&lt;/span&gt;&lt;sub&gt;${X}0&lt;/sub&gt;`;
+    rI.innerHTML=`&lt;span class=&quot;m&quot;&gt;I&lt;/span&gt;&lt;sub&gt;${X}&lt;/sub&gt; = ${f(val.I)} &lt;span class=&quot;m&quot;&gt;I&lt;/span&gt;&lt;sub&gt;${X}0&lt;/sub&gt;`;
+    document.getElementById(&quot;cardV&quot;).style.opacity=vis.V?1:.35;
+    document.getElementById(&quot;cardI&quot;).style.opacity=vis.I?1:.35;
+    slider.value=Math.round(theta/TMAX*1000);
+  }
+
+  document.querySelectorAll(&quot;[data-mode]&quot;).forEach(b=&gt;b.addEventListener(&quot;click&quot;,()=&gt;{
+    mode=b.dataset.mode;
+    document.querySelectorAll(&quot;[data-mode]&quot;).forEach(x=&gt;x.setAttribute(&quot;aria-pressed&quot;,x===b?&quot;true&quot;:&quot;false&quot;));
+    render();
+  }));
+  document.querySelectorAll(&quot;[data-ref]&quot;).forEach(b=&gt;b.addEventListener(&quot;click&quot;,()=&gt;{
+    ref=b.dataset.ref;
+    document.querySelectorAll(&quot;[data-ref]&quot;).forEach(x=&gt;x.setAttribute(&quot;aria-pressed&quot;,x===b?&quot;true&quot;:&quot;false&quot;));
+    buildStatic();render();
+  }));
+  const playBtn=document.getElementById(&quot;play&quot;);
+  let last=null;
+  function setPlay(p){playing=p;playBtn.textContent=p?&quot;❚❚ 一時停止&quot;:&quot;▶ 再生&quot;;last=null;}
+  playBtn.addEventListener(&quot;click&quot;,()=&gt;setPlay(!playing));
+  document.getElementById(&quot;spd&quot;).addEventListener(&quot;change&quot;,e=&gt;{period=+e.target.value;});
+  slider.addEventListener(&quot;input&quot;,()=&gt;{setPlay(false);theta=slider.value/1000*TMAX;render();});
+
+  function svgPt(ev){const p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+  let dragging=false;
+  function dragTo(ev){
+    const p=svgPt(ev);
+    if(p.x&gt;=x0){theta=Math.min(TMAX,Math.max(0,(p.x-x0)/k));}
+    else{
+      // drag the visible vector; convert its angle back to ωt
+      const q=mode===&quot;I&quot;?&quot;I&quot;:(mode===&quot;V&quot;?&quot;V&quot;:ref);
+      let a=Math.atan2(cy-p.y,p.x-cx)-phases()[q];
+      a=((a%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+      const turn=Math.floor(theta/(2*Math.PI)); let t2=turn*2*Math.PI+a;
+      if(t2-theta&gt;Math.PI)t2-=2*Math.PI; if(theta-t2&gt;Math.PI)t2+=2*Math.PI;
+      theta=Math.min(TMAX,Math.max(0,t2));}
+    render();
+  }
+  svg.addEventListener(&quot;pointerdown&quot;,ev=&gt;{dragging=true;setPlay(false);svg.setPointerCapture(ev.pointerId);dragTo(ev);});
+  svg.addEventListener(&quot;pointermove&quot;,ev=&gt;{if(dragging)dragTo(ev);});
+  svg.addEventListener(&quot;pointerup&quot;,()=&gt;dragging=false);
+  svg.addEventListener(&quot;pointercancel&quot;,()=&gt;dragging=false);
+
+  function loop(ts){
+    if(playing){
+      if(last!==null){theta+=(ts-last)/1000*(2*Math.PI/period); if(theta&gt;TMAX)theta=0;}
+      last=ts; render();
+    } else last=null;
+    requestAnimationFrame(loop);
+  }
+  setPlay(playing);
+  if(!playing) theta=Math.PI/5;
+  buildStatic(); render();
+  requestAnimationFrame(loop);
+})();
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;" hidden></iframe><iframe id="f-capacitor" title="コンデンサーの回転ベクトル" srcdoc="&lt;!doctype html&gt;&lt;html lang=&quot;ja&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;style&gt;html{color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}&lt;/style&gt;&lt;title&gt;コンデンサーの回転ベクトル&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&amp;family=Noto+Serif:ital,wght@1,500&amp;display=swap&quot;&gt;
+&lt;style&gt;
+:root{
+  --bg:#f6f4ee; --panel:#ffffff; --ink:#23262b; --muted:#6b6f76; --line:#d9d6cc; --axis:#3a3d42;
+  --v:#1f9e78; --i:#e25b1f; --arc:#f2c48d; --ph:#6b5bd2; --btn:#ecebe4;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme=&quot;light&quot;]){
+    --bg:#15181b; --panel:#1d2125; --ink:#e8e9e6; --muted:#9aa0a6; --line:#343a40; --axis:#c9ccd0;
+    --v:#3cc99c; --i:#ff8048; --arc:#8a6231; --ph:#a99bff; --btn:#272c31;
+    color-scheme:dark;
+  }
+}
+:root[data-theme=&quot;dark&quot;]{
+  --bg:#15181b; --panel:#1d2125; --ink:#e8e9e6; --muted:#9aa0a6; --line:#343a40; --axis:#c9ccd0;
+  --v:#3cc99c; --i:#ff8048; --arc:#8a6231; --ph:#a99bff; --btn:#272c31;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--ink);font-family:&quot;Zen Kaku Gothic New&quot;,&quot;Hiragino Sans&quot;,&quot;Yu Gothic&quot;,sans-serif;font-size:15px;line-height:1.7;padding:24px 16px 40px}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-size:1.45rem;margin:0;text-wrap:balance;font-weight:700;letter-spacing:.02em}
+.lead{margin:0;color:var(--muted);max-width:66ch}
+.m{font-family:&quot;Noto Serif&quot;,&quot;Times New Roman&quot;,serif;font-style:italic;font-weight:500}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+.grp{display:flex;align-items:center;gap:8px}
+.grp .cap{font-size:.85rem;color:var(--muted)}
+.seg{display:inline-flex;background:var(--btn);border-radius:10px;padding:4px;gap:4px}
+.seg button{font:inherit;font-weight:700;font-size:1rem;border:0;background:transparent;color:var(--muted);padding:8px 20px;border-radius:7px;cursor:pointer}
+.seg.small button{font-size:.9rem;padding:6px 14px}
+.seg button[aria-pressed=&quot;true&quot;]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.seg button[data-mode=&quot;V&quot;][aria-pressed=&quot;true&quot;],.seg button[data-ref=&quot;V&quot;][aria-pressed=&quot;true&quot;]{color:var(--v)}
+.seg button[data-mode=&quot;I&quot;][aria-pressed=&quot;true&quot;],.seg button[data-ref=&quot;I&quot;][aria-pressed=&quot;true&quot;]{color:var(--i)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--v);outline-offset:2px}
+.play{font:inherit;font-weight:700;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 16px;border-radius:8px;cursor:pointer;min-width:7.5em}
+.speed select{font:inherit;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;overflow-x:auto}
+svg{display:block;width:100%;min-width:640px;height:auto;touch-action:none}
+.slider{display:flex;align-items:center;gap:12px}
+.slider label{white-space:nowrap;font-weight:500}
+.slider input{flex:1;accent-color:var(--ink)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.card .k{font-size:.8rem;color:var(--muted);letter-spacing:.06em}
+.card .val{font-size:1.15rem;font-variant-numeric:tabular-nums}
+.card.v .val{color:var(--v)} .card.i .val{color:var(--i)}
+.key{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--ph);border-radius:10px;padding:10px 14px;font-weight:500}
+.notes{margin:0;padding-left:1.2em;max-width:72ch}
+.notes li{margin:.2em 0}
+svg text{font-family:&quot;Noto Serif&quot;,&quot;Times New Roman&quot;,serif;font-style:italic;fill:var(--ink)}
+&lt;/style&gt;
+
+&lt;div class=&quot;wrap&quot;&gt;
+  &lt;header&gt;
+    &lt;h1&gt;コンデンサーの回転ベクトルと交流の波形&lt;/h1&gt;
+    &lt;p class=&quot;lead&quot;&gt;コンデンサーに流れる交流の電圧・電流を回転ベクトルで表します。ベクトルの &lt;span class=&quot;m&quot;&gt;y&lt;/span&gt; 成分が右のグラフの値です。コンデンサーでは電流のベクトルが電圧のベクトルより &lt;span class=&quot;m&quot;&gt;π&lt;/span&gt;/2 だけ先を回ります。&lt;/p&gt;
+  &lt;/header&gt;
+
+  &lt;div class=&quot;toolbar&quot;&gt;
+    &lt;div class=&quot;seg&quot; role=&quot;group&quot; aria-label=&quot;表示する量&quot;&gt;
+      &lt;button type=&quot;button&quot; data-mode=&quot;V&quot; aria-pressed=&quot;false&quot;&gt;電圧&lt;/button&gt;
+      &lt;button type=&quot;button&quot; data-mode=&quot;I&quot; aria-pressed=&quot;false&quot;&gt;電流&lt;/button&gt;
+      &lt;button type=&quot;button&quot; data-mode=&quot;B&quot; aria-pressed=&quot;true&quot;&gt;両方&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;button type=&quot;button&quot; class=&quot;play&quot; id=&quot;play&quot;&gt;❚❚ 一時停止&lt;/button&gt;
+    &lt;div class=&quot;grp speed&quot;&gt;&lt;label class=&quot;cap&quot; for=&quot;spd&quot;&gt;速さ&lt;/label&gt;
+      &lt;select id=&quot;spd&quot;&gt;
+        &lt;option value=&quot;8&quot;&gt;ゆっくり&lt;/option&gt;
+        &lt;option value=&quot;5&quot; selected&gt;ふつう&lt;/option&gt;
+        &lt;option value=&quot;2.5&quot;&gt;はやい&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;grp&quot;&gt;&lt;span class=&quot;cap&quot;&gt;式の基準&lt;/span&gt;
+      &lt;div class=&quot;seg small&quot; role=&quot;group&quot; aria-label=&quot;式の基準&quot;&gt;
+        &lt;button type=&quot;button&quot; data-ref=&quot;I&quot; aria-pressed=&quot;true&quot;&gt;電流&lt;/button&gt;
+        &lt;button type=&quot;button&quot; data-ref=&quot;V&quot; aria-pressed=&quot;false&quot;&gt;電圧&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;stage&quot;&gt;
+    &lt;svg id=&quot;svg&quot; viewBox=&quot;0 0 900 400&quot; aria-label=&quot;回転ベクトルと波形のグラフ&quot;&gt;&lt;/svg&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;slider&quot;&gt;
+    &lt;label for=&quot;theta&quot;&gt;&lt;span class=&quot;m&quot;&gt;ωt&lt;/span&gt; を動かす&lt;/label&gt;
+    &lt;input type=&quot;range&quot; id=&quot;theta&quot; min=&quot;0&quot; max=&quot;1000&quot; value=&quot;0&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;readout&quot;&gt;
+    &lt;div class=&quot;card&quot;&gt;&lt;div class=&quot;k&quot;&gt;回転角&lt;/div&gt;&lt;div class=&quot;val&quot; id=&quot;rAng&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;card v&quot; id=&quot;cardV&quot;&gt;&lt;div class=&quot;k&quot;&gt;電圧の瞬時値&lt;/div&gt;&lt;div class=&quot;val&quot; id=&quot;rV&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;card i&quot; id=&quot;cardI&quot;&gt;&lt;div class=&quot;k&quot;&gt;電流の瞬時値&lt;/div&gt;&lt;div class=&quot;val&quot; id=&quot;rI&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;key&quot;&gt;コンデンサー：電流の位相は電圧より &lt;span class=&quot;m&quot;&gt;π&lt;/span&gt;/2 &lt;strong&gt;進む&lt;/strong&gt;（電圧が &lt;span class=&quot;m&quot;&gt;π&lt;/span&gt;/2 遅れる）&lt;/div&gt;
+
+  &lt;ul class=&quot;notes&quot;&gt;
+    &lt;li&gt;回転ベクトルの長さ = 最大値、回転の角速度 = &lt;span class=&quot;m&quot;&gt;ω&lt;/span&gt;。ベクトルの &lt;span class=&quot;m&quot;&gt;y&lt;/span&gt; 成分が瞬時値です。&lt;/li&gt;
+    &lt;li&gt;ベクトルの先端から横に引いた点線が、グラフ上のその時刻の点につながります。&lt;/li&gt;
+    &lt;li&gt;紫の弧は電圧と電流のベクトルのなす角（位相差 &lt;span class=&quot;m&quot;&gt;π&lt;/span&gt;/2）です。2本は直角のまま一緒に回ります。&lt;/li&gt;
+    &lt;li&gt;「式の基準」で、電流と電圧のどちらを sin &lt;span class=&quot;m&quot;&gt;ωt&lt;/span&gt; とおくかを切り替えられます（教科書の書き方に合わせてください）。&lt;/li&gt;
+    &lt;li&gt;グラフやベクトルの円をドラッグしても角度を動かせます。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+const CFG={sub:&quot;C&quot;,vLead:-Math.PI/2};
+(function(){
+  const NS=&quot;http://www.w3.org/2000/svg&quot;;
+  const svg=document.getElementById(&quot;svg&quot;);
+  const cx=190, cy=200, x0=400, xEnd=880;
+  const R={V:150,I:95};
+  const k=380/(2*Math.PI);
+  const TMAX=(xEnd-10-x0)/k;
+  const col={V:&quot;var(--v)&quot;,I:&quot;var(--i)&quot;};
+  const X=CFG.sub;               // &quot;L&quot; or &quot;C&quot;
+  let mode=&quot;B&quot;, ref=&quot;I&quot;, theta=0, playing=!matchMedia(&quot;(prefers-reduced-motion: reduce)&quot;).matches, period=5;
+  // phase of each quantity relative to the reference (lead = +)
+  function phases(){ // CFG.vLead: phase of V minus phase of I
+    return ref===&quot;I&quot; ? {I:0,V:CFG.vLead} : {V:0,I:-CFG.vLead};
+  }
+
+  function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const a in attrs)e.setAttribute(a,attrs[a]);(parent||svg).appendChild(e);return e;}
+  function txt(s,x,y,attrs,parent){const t=el(&quot;text&quot;,Object.assign({x,y},attrs||{}),parent);t.textContent=s;return t;}
+
+  const defs=el(&quot;defs&quot;,{});
+  [&quot;V&quot;,&quot;I&quot;].forEach(q=&gt;{
+    const m=el(&quot;marker&quot;,{id:&quot;ah&quot;+q,viewBox:&quot;0 0 10 10&quot;,refX:&quot;8&quot;,refY:&quot;5&quot;,markerWidth:&quot;5&quot;,markerHeight:&quot;5&quot;,orient:&quot;auto&quot;},defs);
+    el(&quot;path&quot;,{d:&quot;M0,0 L10,5 L0,10 z&quot;,fill:col[q]},m);
+  });
+  const mx=el(&quot;marker&quot;,{id:&quot;ax&quot;,viewBox:&quot;0 0 10 10&quot;,refX:&quot;8&quot;,refY:&quot;5&quot;,markerWidth:&quot;7&quot;,markerHeight:&quot;7&quot;,orient:&quot;auto&quot;},defs);
+  el(&quot;path&quot;,{d:&quot;M0,1 L10,5 L0,9 z&quot;,fill:&quot;var(--axis)&quot;},mx);
+
+  el(&quot;line&quot;,{x1:25,y1:cy,x2:360,y2:cy,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  el(&quot;line&quot;,{x1:cx,y1:375,x2:cx,y2:22,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  txt(&quot;x&quot;,352,222); txt(&quot;y&quot;,200,30); txt(&quot;O&quot;,cx-22,cy+22,{style:&quot;font-style:normal&quot;});
+  el(&quot;line&quot;,{x1:x0,y1:cy,x2:xEnd+10,y2:cy,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  el(&quot;line&quot;,{x1:x0,y1:375,x2:x0,y2:22,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.4,&quot;marker-end&quot;:&quot;url(#ax)&quot;});
+  txt(&quot;t&quot;,xEnd+2,222); txt(&quot;O&quot;,x0-22,cy+22,{style:&quot;font-style:normal&quot;});
+  const tickLbl=[&quot;T/4&quot;,&quot;T/2&quot;,&quot;3T/4&quot;,&quot;T&quot;];
+  for(let n=1;n&lt;=4;n++){const x=x0+k*n*Math.PI/2;
+    el(&quot;line&quot;,{x1:x,y1:cy-4,x2:x,y2:cy+4,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1});
+    txt(tickLbl[n-1],x-12,cy+20,{&quot;font-size&quot;:12,style:&quot;fill:var(--muted)&quot;});}
+
+  // angle arc (ωt) and reference ray
+  const arc=el(&quot;path&quot;,{fill:&quot;var(--arc)&quot;,opacity:.55});
+  const arcLine=el(&quot;path&quot;,{fill:&quot;none&quot;,stroke:&quot;var(--axis)&quot;,&quot;stroke-width&quot;:1.3});
+  const refRay=el(&quot;line&quot;,{x1:cx,y1:cy,stroke:&quot;var(--muted)&quot;,&quot;stroke-width&quot;:1.3,&quot;stroke-dasharray&quot;:&quot;4 4&quot;});
+  const arcLbl=txt(&quot;ωt&quot;,0,0,{&quot;font-size&quot;:18});
+  const phArc=el(&quot;path&quot;,{fill:&quot;none&quot;,stroke:&quot;var(--ph)&quot;,&quot;stroke-width&quot;:2.2});
+  const phLbl=txt(&quot;π/2&quot;,0,0,{&quot;font-size&quot;:16,style:&quot;fill:var(--ph)&quot;});
+
+  const L={};
+  [&quot;I&quot;,&quot;V&quot;].forEach(q=&gt;{
+    const g=el(&quot;g&quot;,{}), r=R[q];
+    L[q]={g,
+      circle:el(&quot;circle&quot;,{cx,cy,r,fill:&quot;none&quot;,stroke:col[q],&quot;stroke-width&quot;:1.4},g),
+      guideTop:el(&quot;line&quot;,{x1:cx,y1:cy-r,x2:xEnd,y2:cy-r,stroke:col[q],&quot;stroke-width&quot;:1,&quot;stroke-dasharray&quot;:&quot;5 5&quot;,opacity:.55},g),
+      guideBot:el(&quot;line&quot;,{x1:cx,y1:cy+r,x2:xEnd,y2:cy+r,stroke:col[q],&quot;stroke-width&quot;:1,&quot;stroke-dasharray&quot;:&quot;5 5&quot;,opacity:.55},g),
+      ghost:el(&quot;path&quot;,{fill:&quot;none&quot;,stroke:col[q],&quot;stroke-width&quot;:1.5,opacity:.22},g),
+      trace:el(&quot;path&quot;,{fill:&quot;none&quot;,stroke:col[q],&quot;stroke-width&quot;:3.2,&quot;stroke-linecap&quot;:&quot;round&quot;},g),
+      comp:el(&quot;line&quot;,{stroke:col[q],&quot;stroke-width&quot;:5,&quot;stroke-linecap&quot;:&quot;round&quot;,opacity:.45},g),
+      proj:el(&quot;line&quot;,{stroke:col[q],&quot;stroke-width&quot;:1.4,&quot;stroke-dasharray&quot;:&quot;6 4&quot;},g),
+      drop:el(&quot;line&quot;,{stroke:col[q],&quot;stroke-width&quot;:1,&quot;stroke-dasharray&quot;:&quot;3 4&quot;,opacity:.8},g),
+      vec:el(&quot;line&quot;,{x1:cx,y1:cy,stroke:col[q],&quot;stroke-width&quot;:4,&quot;marker-end&quot;:&quot;url(#ah&quot;+q+&quot;)&quot;},g),
+      tipDot:el(&quot;circle&quot;,{r:4.5,fill:col[q]},g),
+      dot:el(&quot;circle&quot;,{r:6,fill:col[q],stroke:&quot;var(--panel)&quot;,&quot;stroke-width&quot;:2},g),
+      label:txt(&quot;&quot;,0,0,{&quot;font-size&quot;:20,style:&quot;fill:&quot;+col[q]},g)
+    };
+    L[q].label.innerHTML=q+&#x27;&lt;tspan font-size=&quot;13&quot; dy=&quot;4&quot; style=&quot;font-style:normal&quot;&gt;&#x27;+X+&#x27;&lt;/tspan&gt;&#x27;;
+  });
+  const tLbl=txt(&quot;t&quot;,0,0,{&quot;font-size&quot;:17});
+  const fV=txt(&quot;&quot;,0,0,{&quot;font-size&quot;:17,style:&quot;fill:var(--v)&quot;}), fI=txt(&quot;&quot;,0,0,{&quot;font-size&quot;:17,style:&quot;fill:var(--i)&quot;});
+
+  function phaseStr(p){ if(Math.abs(p)&lt;1e-9) return &quot; sin ωt&quot;; return p&gt;0?&quot; sin(ωt + π/2)&quot;:&quot; sin(ωt − π/2)&quot;; }
+  function svgFormula(q,p){ return q+&#x27;&lt;tspan font-size=&quot;12&quot; dy=&quot;4&quot; style=&quot;font-style:normal&quot;&gt;&#x27;+X+&#x27;&lt;/tspan&gt;&lt;tspan dy=&quot;-4&quot;&gt; = &#x27;+q+&#x27;&lt;/tspan&gt;&lt;tspan font-size=&quot;12&quot; dy=&quot;4&quot; style=&quot;font-style:normal&quot;&gt;&#x27;+X+&#x27;0&lt;/tspan&gt;&lt;tspan dy=&quot;-4&quot;&gt;&#x27;+phaseStr(p)+&#x27;&lt;/tspan&gt;&#x27;; }
+  function buildStatic(){
+    const ph=phases();
+    [&quot;V&quot;,&quot;I&quot;].forEach(q=&gt;{
+      let d=&quot;&quot;;for(let a=0;a&lt;=TMAX;a+=0.02){d+=(a?&quot;L&quot;:&quot;M&quot;)+(x0+k*a).toFixed(1)+&quot;,&quot;+(cy-R[q]*Math.sin(a+ph[q])).toFixed(1);}
+      L[q].ghost.setAttribute(&quot;d&quot;,d);
+    });
+    fV.innerHTML=svgFormula(&quot;V&quot;,ph.V); fI.innerHTML=svgFormula(&quot;I&quot;,ph.I);
+  }
+
+  const rAng=document.getElementById(&quot;rAng&quot;),rV=document.getElementById(&quot;rV&quot;),rI=document.getElementById(&quot;rI&quot;);
+  const slider=document.getElementById(&quot;theta&quot;);
+
+  function render(){
+    const vis={V:mode!==&quot;I&quot;,I:mode!==&quot;V&quot;};
+    const ph=phases(), gx=x0+k*theta;
+    const val={};
+    [&quot;V&quot;,&quot;I&quot;].forEach(q=&gt;{
+      const o=L[q],r=R[q],a=theta+ph[q],s=Math.sin(a),c=Math.cos(a);
+      val[q]=s;
+      o.g.style.display=vis[q]?&quot;&quot;:&quot;none&quot;;
+      const tx=cx+r*c, ty=cy-r*s;
+      o.vec.setAttribute(&quot;x2&quot;,cx+(r-3)*c); o.vec.setAttribute(&quot;y2&quot;,cy-(r-3)*s);
+      o.tipDot.setAttribute(&quot;cx&quot;,tx);o.tipDot.setAttribute(&quot;cy&quot;,ty);
+      o.comp.setAttribute(&quot;x1&quot;,tx);o.comp.setAttribute(&quot;y1&quot;,cy);o.comp.setAttribute(&quot;x2&quot;,tx);o.comp.setAttribute(&quot;y2&quot;,ty);
+      o.proj.setAttribute(&quot;x1&quot;,tx);o.proj.setAttribute(&quot;y1&quot;,ty);o.proj.setAttribute(&quot;x2&quot;,gx);o.proj.setAttribute(&quot;y2&quot;,ty);
+      o.drop.setAttribute(&quot;x1&quot;,gx);o.drop.setAttribute(&quot;y1&quot;,ty);o.drop.setAttribute(&quot;x2&quot;,gx);o.drop.setAttribute(&quot;y2&quot;,cy);
+      o.dot.setAttribute(&quot;cx&quot;,gx);o.dot.setAttribute(&quot;cy&quot;,ty);
+      let d=&quot;&quot;;for(let b=0;b&lt;theta;b+=0.02){d+=(b?&quot;L&quot;:&quot;M&quot;)+(x0+k*b).toFixed(1)+&quot;,&quot;+(cy-r*Math.sin(b+ph[q])).toFixed(1);}
+      d+=(d?&quot;L&quot;:&quot;M&quot;)+gx.toFixed(1)+&quot;,&quot;+ty.toFixed(1);
+      o.trace.setAttribute(&quot;d&quot;,d);
+      o.label.setAttribute(&quot;x&quot;,cx+(r+22)*c-10);o.label.setAttribute(&quot;y&quot;,cy-(r+22)*s+7);
+    });
+    // ωt arc to reference direction
+    const ar=38, a=theta%(2*Math.PI), big=a&gt;Math.PI?1:0;
+    const ex=cx+ar*Math.cos(a), ey=cy-ar*Math.sin(a);
+    if(a&lt;0.001){arc.setAttribute(&quot;d&quot;,&quot;&quot;);arcLine.setAttribute(&quot;d&quot;,&quot;&quot;);}
+    else{arc.setAttribute(&quot;d&quot;,`M${cx},${cy} L${cx+ar},${cy} A${ar},${ar} 0 ${big} 0 ${ex},${ey} Z`);
+      arcLine.setAttribute(&quot;d&quot;,`M${cx+ar},${cy} A${ar},${ar} 0 ${big} 0 ${ex},${ey}`);}
+    const ha=a/2, lr=ar+16;
+    arcLbl.setAttribute(&quot;x&quot;,cx+lr*Math.cos(ha)-9);arcLbl.setAttribute(&quot;y&quot;,cy-lr*Math.sin(ha)+6);
+    arcLbl.style.display=a&gt;0.4?&quot;&quot;:&quot;none&quot;;
+    // reference ray when the reference vector is hidden
+    refRay.style.display=vis[ref]?&quot;none&quot;:&quot;&quot;;
+    refRay.setAttribute(&quot;x2&quot;,cx+R.V*Math.cos(theta));refRay.setAttribute(&quot;y2&quot;,cy-R.V*Math.sin(theta));
+    // phase-difference arc between the two vectors
+    const showPh=mode===&quot;B&quot;||!vis[ref];
+    phArc.style.display=phLbl.style.display=showPh?&quot;&quot;:&quot;none&quot;;
+    const a1=theta+Math.min(ph.V,ph.I), a2=theta+Math.max(ph.V,ph.I), pr=64;
+    phArc.setAttribute(&quot;d&quot;,`M${cx+pr*Math.cos(a1)},${cy-pr*Math.sin(a1)} A${pr},${pr} 0 0 0 ${cx+pr*Math.cos(a2)},${cy-pr*Math.sin(a2)}`);
+    const am=(a1+a2)/2;
+    phLbl.setAttribute(&quot;x&quot;,cx+(pr+16)*Math.cos(am)-12);phLbl.setAttribute(&quot;y&quot;,cy-(pr+16)*Math.sin(am)+6);
+    // formulas
+    fV.style.display=vis.V?&quot;&quot;:&quot;none&quot;; fI.style.display=vis.I?&quot;&quot;:&quot;none&quot;;
+    fV.setAttribute(&quot;x&quot;,680);fV.setAttribute(&quot;y&quot;,36);
+    fI.setAttribute(&quot;x&quot;,680);fI.setAttribute(&quot;y&quot;,vis.V?60:36);
+    tLbl.setAttribute(&quot;x&quot;,gx-4);tLbl.setAttribute(&quot;y&quot;,cy+38);
+    // readouts
+    const deg=theta*180/Math.PI;
+    rAng.innerHTML=`&lt;span class=&quot;m&quot;&gt;ωt&lt;/span&gt; = ${deg.toFixed(0)}°`+`　&lt;span style=&quot;color:var(--muted);font-size:.9rem&quot;&gt;t = ${(theta/(2*Math.PI)).toFixed(2)} T&lt;/span&gt;`;
+    const f=s=&gt;(s&gt;=-0.005?&quot;+&quot;:&quot;−&quot;)+Math.abs(s).toFixed(2);
+    rV.innerHTML=`&lt;span class=&quot;m&quot;&gt;V&lt;/span&gt;&lt;sub&gt;${X}&lt;/sub&gt; = ${f(val.V)} &lt;span class=&quot;m&quot;&gt;V&lt;/span&gt;&lt;sub&gt;${X}0&lt;/sub&gt;`;
+    rI.innerHTML=`&lt;span class=&quot;m&quot;&gt;I&lt;/span&gt;&lt;sub&gt;${X}&lt;/sub&gt; = ${f(val.I)} &lt;span class=&quot;m&quot;&gt;I&lt;/span&gt;&lt;sub&gt;${X}0&lt;/sub&gt;`;
+    document.getElementById(&quot;cardV&quot;).style.opacity=vis.V?1:.35;
+    document.getElementById(&quot;cardI&quot;).style.opacity=vis.I?1:.35;
+    slider.value=Math.round(theta/TMAX*1000);
+  }
+
+  document.querySelectorAll(&quot;[data-mode]&quot;).forEach(b=&gt;b.addEventListener(&quot;click&quot;,()=&gt;{
+    mode=b.dataset.mode;
+    document.querySelectorAll(&quot;[data-mode]&quot;).forEach(x=&gt;x.setAttribute(&quot;aria-pressed&quot;,x===b?&quot;true&quot;:&quot;false&quot;));
+    render();
+  }));
+  document.querySelectorAll(&quot;[data-ref]&quot;).forEach(b=&gt;b.addEventListener(&quot;click&quot;,()=&gt;{
+    ref=b.dataset.ref;
+    document.querySelectorAll(&quot;[data-ref]&quot;).forEach(x=&gt;x.setAttribute(&quot;aria-pressed&quot;,x===b?&quot;true&quot;:&quot;false&quot;));
+    buildStatic();render();
+  }));
+  const playBtn=document.getElementById(&quot;play&quot;);
+  let last=null;
+  function setPlay(p){playing=p;playBtn.textContent=p?&quot;❚❚ 一時停止&quot;:&quot;▶ 再生&quot;;last=null;}
+  playBtn.addEventListener(&quot;click&quot;,()=&gt;setPlay(!playing));
+  document.getElementById(&quot;spd&quot;).addEventListener(&quot;change&quot;,e=&gt;{period=+e.target.value;});
+  slider.addEventListener(&quot;input&quot;,()=&gt;{setPlay(false);theta=slider.value/1000*TMAX;render();});
+
+  function svgPt(ev){const p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+  let dragging=false;
+  function dragTo(ev){
+    const p=svgPt(ev);
+    if(p.x&gt;=x0){theta=Math.min(TMAX,Math.max(0,(p.x-x0)/k));}
+    else{
+      // drag the visible vector; convert its angle back to ωt
+      const q=mode===&quot;I&quot;?&quot;I&quot;:(mode===&quot;V&quot;?&quot;V&quot;:ref);
+      let a=Math.atan2(cy-p.y,p.x-cx)-phases()[q];
+      a=((a%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+      const turn=Math.floor(theta/(2*Math.PI)); let t2=turn*2*Math.PI+a;
+      if(t2-theta&gt;Math.PI)t2-=2*Math.PI; if(theta-t2&gt;Math.PI)t2+=2*Math.PI;
+      theta=Math.min(TMAX,Math.max(0,t2));}
+    render();
+  }
+  svg.addEventListener(&quot;pointerdown&quot;,ev=&gt;{dragging=true;setPlay(false);svg.setPointerCapture(ev.pointerId);dragTo(ev);});
+  svg.addEventListener(&quot;pointermove&quot;,ev=&gt;{if(dragging)dragTo(ev);});
+  svg.addEventListener(&quot;pointerup&quot;,()=&gt;dragging=false);
+  svg.addEventListener(&quot;pointercancel&quot;,()=&gt;dragging=false);
+
+  function loop(ts){
+    if(playing){
+      if(last!==null){theta+=(ts-last)/1000*(2*Math.PI/period); if(theta&gt;TMAX)theta=0;}
+      last=ts; render();
+    } else last=null;
+    requestAnimationFrame(loop);
+  }
+  setPlay(playing);
+  if(!playing) theta=Math.PI/5;
+  buildStatic(); render();
+  requestAnimationFrame(loop);
+})();
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;" hidden></iframe>
+<script>
+const tabs=[...document.querySelectorAll('.tab')];
+function fit(f){try{const d=f.contentDocument;if(d&&d.body)f.style.height=(d.documentElement.scrollHeight+10)+'px';}catch(e){}}
+function show(k){
+  if(!document.getElementById('f-'+k))k='resistor';
+  tabs.forEach(t=>t.setAttribute('aria-selected',t.dataset.k===k?'true':'false'));
+  document.querySelectorAll('iframe').forEach(f=>{f.hidden=f.id!=='f-'+k; if(!f.hidden) fit(f);});
+  history.replaceState(null,'','#'+k);
+}
+tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.k)));
+document.querySelectorAll('iframe').forEach(f=>{f.addEventListener('load',()=>fit(f));});
+window.addEventListener('resize',()=>document.querySelectorAll('iframe:not([hidden])').forEach(fit));
+setInterval(()=>document.querySelectorAll('iframe:not([hidden])').forEach(fit),1000);
+show(location.hash.slice(1)||'resistor');
+</script></body></html>
