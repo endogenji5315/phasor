@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RLC回路の回転ベクトル</title>
+<style>
+:root{--bg:#f6f4ee;--ink:#23262b;--muted:#6b6f76;--btn:#ecebe4;--panel:#fff;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#15181b;--ink:#e8e9e6;--muted:#9aa0a6;--btn:#272c31;--panel:#1d2125;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px 16px;border-bottom:1px solid rgba(128,128,128,.25)}
+nav .name{font-weight:700}
+.tabs{display:inline-flex;background:var(--btn);border-radius:10px;padding:4px;gap:4px}
+.tab{font:inherit;font-weight:700;font-size:1rem;border:0;background:transparent;color:var(--muted);padding:8px 22px;border-radius:7px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.tab:focus-visible{outline:2px solid #1f9e78;outline-offset:2px}
+iframe{display:block;width:100%;border:0;height:1600px}
+iframe[hidden]{display:none}
+.lbl{margin:0;padding:10px 16px 0;color:var(--muted);font-weight:700;font-size:1.05rem}
+.lbl[hidden]{display:none}
+body.cmp #f-parallel{border-top:3px solid rgba(128,128,128,.35)}
+</style></head><body>
+<nav><span class="name">RLC回路の回転ベクトル</span>
+<div class="tabs" role="tablist">
+<button type="button" class="tab" role="tab" data-k="series" aria-selected="false">直列回路</button>
+<button type="button" class="tab" role="tab" data-k="parallel" aria-selected="false">並列回路</button>
+<button type="button" class="tab" role="tab" data-k="compare" aria-selected="true">上下で比較</button>
+</div></nav>
+<p class="lbl" id="l-series" hidden>▼ 直列回路</p>
+<iframe id="f-series" title="RLC直列回路" src="rlc.html"></iframe>
+<p class="lbl" id="l-parallel" hidden>▼ 並列回路</p>
+<iframe id="f-parallel" title="RLC並列回路" src="rlc-parallel.html" hidden></iframe>
+<script>
+const tabs=[...document.querySelectorAll('.tab')];
+function fit(f){try{const d=f.contentDocument;if(d&&d.body)f.style.height=(Math.ceil(d.body.getBoundingClientRect().height)+16)+'px';}catch(e){}}
+const CMP_CSS='.lead,.notes,.cards{display:none!important}body{padding-top:8px!important;padding-bottom:12px!important}h1{font-size:1.15rem!important}.wrap{gap:10px!important}';
+function compact(f,on){try{const d=f.contentDocument;if(!d||!d.head)return;let st=d.getElementById('cmpstyle');if(on&&!st){st=d.createElement('style');st.id='cmpstyle';st.textContent=CMP_CSS;d.head.appendChild(st);}if(!on&&st)st.remove();}catch(e){}}
+let mode='series';
+function show(k){
+  if(!['series','parallel','compare'].includes(k))k='series';
+  tabs.forEach(t=>t.setAttribute('aria-selected',t.dataset.k===k?'true':'false'));
+  mode=k;const cmp=k==='compare';document.body.classList.toggle('cmp',cmp);
+  ['series','parallel'].forEach(q=>{const f=document.getElementById('f-'+q);f.hidden=!(cmp||k===q);document.getElementById('l-'+q).hidden=!cmp;compact(f,cmp);if(!f.hidden)fit(f);});
+  history.replaceState(null,'','#'+k);
+}
+tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.k)));
+document.querySelectorAll('iframe').forEach(f=>f.addEventListener('load',()=>{compact(f,mode==='compare');fit(f);}));
+setInterval(()=>document.querySelectorAll('iframe:not([hidden])').forEach(fit),800);
+show(location.hash.slice(1)||'compare');
+</script></body></html>
