@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RLC回路の回転ベクトル合成</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Serif:ital,wght@1,500&display=swap">
+<style>
+:root{
+  --bg:#f6f4ee; --panel:#ffffff; --ink:#23262b; --muted:#6b6f76; --line:#d9d6cc; --axis:#3a3d42; --btn:#ecebe4;
+  --r:#2f6fd0; --l:#1f9e78; --c:#8a4fd6; --v:#23262b; --i:#e25b1f; --arc:#f2c48d;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181b; --panel:#1d2125; --ink:#e8e9e6; --muted:#9aa0a6; --line:#343a40; --axis:#c9ccd0; --btn:#272c31;
+    --r:#6aa3ff; --l:#3cc99c; --c:#b48cff; --v:#f1f2ee; --i:#ff8048; --arc:#8a6231;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181b; --panel:#1d2125; --ink:#e8e9e6; --muted:#9aa0a6; --line:#343a40; --axis:#c9ccd0; --btn:#272c31;
+  --r:#6aa3ff; --l:#3cc99c; --c:#b48cff; --v:#f1f2ee; --i:#ff8048; --arc:#8a6231;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;font-size:15px;line-height:1.7;padding:24px 16px 40px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-size:1.45rem;margin:0;text-wrap:balance;letter-spacing:.02em}
+.lead{margin:0;color:var(--muted);max-width:70ch}
+.m{font-family:"Noto Serif","Times New Roman",serif;font-style:italic;font-weight:500}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center}
+.grp{display:flex;align-items:center;gap:8px}
+.cap{font-size:.85rem;color:var(--muted)}
+.seg{display:inline-flex;background:var(--btn);border-radius:10px;padding:4px;gap:4px}
+.seg button{font:inherit;font-weight:700;border:0;background:transparent;color:var(--muted);padding:7px 16px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.btn{font:inherit;font-weight:700;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 14px;border-radius:8px;cursor:pointer}
+#play{min-width:7.5em}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--l);outline-offset:2px}
+select{font:inherit;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;overflow-x:auto}
+svg{display:block;width:100%;min-width:660px;height:auto;touch-action:none}
+svg text{font-family:"Noto Serif","Times New Roman",serif;font-style:italic;fill:var(--ink)}
+.layers{display:flex;flex-wrap:wrap;gap:8px}
+.chk{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);cursor:pointer;user-select:none}
+.chk input{accent-color:currentColor;margin:0}
+.chk .sw{width:18px;height:4px;border-radius:2px}
+.row{display:flex;align-items:center;gap:12px}
+.row label{white-space:nowrap;font-weight:500;min-width:7em}
+.row input[type=range]{flex:1}
+.params{display:grid;grid-template-columns:1fr;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.params .row label{min-width:8.5em}
+.params .note{grid-column:1/-1;color:var(--muted);font-size:.9rem}
+.params output{font-variant-numeric:tabular-nums;min-width:4.2em;text-align:right}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.card h2{font-size:.85rem;color:var(--muted);margin:0 0 6px;letter-spacing:.06em;font-weight:500}
+.big{font-size:1.15rem;font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+td{padding:2px 6px}
+td.n{text-align:right;width:6em}
+tr.sum td{border-top:1px solid var(--line);font-weight:700}
+.notes{margin:0;padding-left:1.2em;max-width:76ch}
+.notes li{margin:.2em 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>RLC直列回路：回転ベクトルの合成とインピーダンス</h1>
+    <p class="lead">抵抗・コイル・コンデンサーの電圧は位相が <span class="m">π</span>/2 ずつずれています。位相のずれた sin どうしを足すことは、回転ベクトルを足すことと同じです。右のグラフの「階段」は、各電圧の瞬時値を足していく様子を表しています。</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="grp"><span class="cap">ベクトルの描き方</span>
+      <div class="seg" role="group" aria-label="ベクトルの描き方">
+        <button type="button" data-draw="origin" aria-pressed="true">原点からそろえる</button>
+        <button type="button" data-draw="chain" aria-pressed="false">つなげて足す</button>
+      </div>
+    </div>
+    <button type="button" class="btn" id="play">❚❚ 一時停止</button>
+    <div class="grp"><label class="cap" for="spd">速さ</label>
+      <select id="spd"><option value="10">ゆっくり</option><option value="6" selected>ふつう</option><option value="3">はやい</option></select>
+    </div>
+    <button type="button" class="btn" id="zero">教科書の向き（<span class="m">ωt</span> = 0）</button>
+  </div>
+
+  <div class="layers" aria-label="表示する量">
+    <label class="chk" style="color:var(--r)"><input type="checkbox" id="sR" checked><span class="sw" style="background:var(--r)"></span><span style="color:var(--ink)"><span class="m">v</span><sub>R</sub>（抵抗）</span></label>
+    <label class="chk" style="color:var(--l)"><input type="checkbox" id="sL" checked><span class="sw" style="background:var(--l)"></span><span style="color:var(--ink)"><span class="m">v</span><sub>L</sub>（コイル）</span></label>
+    <label class="chk" style="color:var(--c)"><input type="checkbox" id="sC" checked><span class="sw" style="background:var(--c)"></span><span style="color:var(--ink)"><span class="m">v</span><sub>C</sub>（コンデンサー）</span></label>
+    <label class="chk" style="color:var(--v)"><input type="checkbox" id="sV" checked><span class="sw" style="background:var(--v);height:6px"></span><span><span class="m">v</span>（合成）</span></label>
+    <label class="chk" style="color:var(--i)"><input type="checkbox" id="sI" checked><span class="sw" style="background:var(--i)"></span><span style="color:var(--ink)"><span class="m">i</span>（電流）</span></label>
+  </div>
+
+  <div class="stage">
+    <svg id="svg" viewBox="0 0 900 420" aria-label="回転ベクトルと電圧の波形"></svg>
+  </div>
+
+  <div class="row">
+    <label for="theta"><span class="m">ωt</span> を動かす</label>
+    <input type="range" id="theta" min="0" max="1000" value="0">
+  </div>
+
+  <div class="params">
+    <div class="row"><label for="pR">抵抗 <span class="m">R</span></label><input type="range" id="pR" min="0" max="100" value="60"><output id="oR"></output></div>
+    <div class="row"><label for="pL">コイル <span class="m">ωL</span></label><input type="range" id="pL" min="0" max="100" value="90"><output id="oL"></output></div>
+    <div class="row"><label for="pC">コンデンサー 1/<span class="m">ωC</span></label><input type="range" id="pC" min="0" max="100" value="40"><output id="oC"></output></div>
+    <div class="note">電流の最大値 <span class="m">I</span><sub>0</sub> = 1 A に固定（各電圧の最大値 = 抵抗・リアクタンス × 1 A）</div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h2>合成ベクトルの大きさ = インピーダンス</h2>
+      <div class="big" id="zText"></div>
+      <div id="vText" style="margin-top:4px"></div>
+      <div id="phText" style="margin-top:4px"></div>
+    </div>
+    <div class="card">
+      <h2>この瞬間の電圧（瞬時値の足し算）</h2>
+      <table>
+        <tr><td style="color:var(--r)"><span class="m">v</span><sub>R</sub> = <span class="m">V</span><sub>R0</sub> sin <span class="m">ωt</span></td><td class="n" id="tR"></td></tr>
+        <tr><td style="color:var(--l)"><span class="m">v</span><sub>L</sub> = <span class="m">V</span><sub>L0</sub> sin(<span class="m">ωt</span> + <span class="m">π</span>/2)</td><td class="n" id="tL"></td></tr>
+        <tr><td style="color:var(--c)"><span class="m">v</span><sub>C</sub> = <span class="m">V</span><sub>C0</sub> sin(<span class="m">ωt</span> − <span class="m">π</span>/2)</td><td class="n" id="tC"></td></tr>
+        <tr class="sum"><td>和 <span class="m">v</span><sub>R</sub> + <span class="m">v</span><sub>L</sub> + <span class="m">v</span><sub>C</sub></td><td class="n" id="tS"></td></tr>
+        <tr><td><span class="m">V</span><sub>0</sub> sin(<span class="m">ωt</span> + <span class="m">φ</span>)</td><td class="n" id="tV"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <ul class="notes">
+    <li>電流 <span class="m">i</span> = <span class="m">I</span><sub>0</sub> sin <span class="m">ωt</span> を基準にしています。抵抗の電圧は電流と同位相、コイルの電圧は <span class="m">π</span>/2 進み、コンデンサーの電圧は <span class="m">π</span>/2 遅れます。</li>
+    <li>「つなげて足す」にすると、3本のベクトルが頭と尾でつながります。つなぎ目の高さは右のグラフの階段の段と同じ高さになります。</li>
+    <li>3本のベクトルは形を保ったまま回るので、和も大きさ <span class="m">V</span><sub>0</sub> の1本のベクトルとして回ります。だから和のグラフも sin の形になります。</li>
+    <li><span class="m">ωL</span> = 1/<span class="m">ωC</span> にすると <span class="m">V</span><sub>L</sub> と <span class="m">V</span><sub>C</sub> が打ち消し合い、<span class="m">Z</span> = <span class="m">R</span> で最小になります（共振）。</li>
+    <li>グラフをドラッグすると時刻を、ベクトルの図をドラッグすると角度を動かせます。</li>
+  </ul>
+</div>
+
+<script>
+(function(){
+  const NS="http://www.w3.org/2000/svg", svg=document.getElementById("svg");
+  const cx=205, cy=210, x0=450, xEnd=850;
+  const S=1.25;          // px per volt
+  const IS=55;           // px per ampere
+  const k=(xEnd-x0)/(2*Math.PI*1.1), TMAX=(xEnd-x0)/k;
+  const C={R:"var(--r)",L:"var(--l)",C:"var(--c)",V:"var(--v)",I:"var(--i)"};
+  let VR=60,VL=90,VC=40, theta=0, draw="origin", playing=!matchMedia("(prefers-reduced-motion: reduce)").matches, period=6;
+  const show={R:true,L:true,C:true,V:true,I:true};
+
+  function el(t,a,p){const e=document.createElementNS(NS,t);for(const n in a)e.setAttribute(n,a[n]);(p||svg).appendChild(e);return e;}
+  function txt(s,x,y,a,p){const t=el("text",Object.assign({x,y},a||{}),p);t.textContent=s;return t;}
+  function set(e,a){for(const n in a)e.setAttribute(n,a[n]);}
+
+  const defs=el("defs",{});
+  Object.keys(C).forEach(q=>{const m=el("marker",{id:"ah"+q,viewBox:"0 0 10 10",refX:"8",refY:"5",markerWidth:q==="V"?"4.2":"4.6",markerHeight:q==="V"?"4.2":"4.6",orient:"auto"},defs);el("path",{d:"M0,0 L10,5 L0,10 z",fill:C[q]},m);});
+  const mx=el("marker",{id:"ax",viewBox:"0 0 10 10",refX:"8",refY:"5",markerWidth:"7",markerHeight:"7",orient:"auto"},defs);el("path",{d:"M0,1 L10,5 L0,9 z",fill:"var(--axis)"},mx);
+
+  // axes
+  el("line",{x1:20,y1:cy,x2:395,y2:cy,stroke:"var(--axis)","stroke-width":1.3,"marker-end":"url(#ax)"});
+  el("line",{x1:cx,y1:405,x2:cx,y2:15,stroke:"var(--axis)","stroke-width":1.3,"marker-end":"url(#ax)"});
+  txt("x",386,230);txt("y",214,24);txt("O",cx-20,cy+20,{style:"font-style:normal"});
+  el("line",{x1:x0,y1:cy,x2:xEnd+40,y2:cy,stroke:"var(--axis)","stroke-width":1.3,"marker-end":"url(#ax)"});
+  el("line",{x1:x0,y1:405,x2:x0,y2:15,stroke:"var(--axis)","stroke-width":1.3,"marker-end":"url(#ax)"});
+  txt("t",xEnd+34,230);txt("O",x0-20,cy+20,{style:"font-style:normal"});
+  ["T/4","T/2","3T/4","T"].forEach((s,n)=>{const x=x0+k*(n+1)*Math.PI/2;el("line",{x1:x,y1:cy-4,x2:x,y2:cy+4,stroke:"var(--axis)"});txt(s,x-12,cy+18,{"font-size":12,style:"fill:var(--muted)"});});
+
+  // layers (back to front)
+  const gGuide=el("g",{}), gCurve=el("g",{}), gArc=el("g",{}), gVec=el("g",{}), gStair=el("g",{}), gLbl=el("g",{});
+  const circV=el("circle",{cx,cy,fill:"none",stroke:"var(--v)","stroke-width":1,"stroke-dasharray":"3 5",opacity:.5},gGuide);
+  const helpers=[0,1,2].map(()=>el("line",{stroke:"var(--muted)","stroke-width":1,"stroke-dasharray":"4 4"},gGuide));
+  const proj={}; ["R","L","C","V","p1","p2"].forEach(q=>proj[q]=el("line",{stroke:C[q]||"var(--muted)","stroke-width":1,"stroke-dasharray":"5 5",opacity:.6},gGuide));
+  proj.V.setAttribute("opacity",.9);
+  const cursor=el("line",{stroke:"var(--muted)","stroke-width":1,"stroke-dasharray":"2 4"},gGuide);
+
+  const ghost={},trace={},dot={};
+  ["I","R","L","C","V"].forEach(q=>{
+    ghost[q]=el("path",{fill:"none",stroke:C[q],"stroke-width":q==="V"?2:1.4,opacity:.22},gCurve);
+    trace[q]=el("path",{fill:"none",stroke:C[q],"stroke-width":q==="V"?3.6:2.2,"stroke-linecap":"round"},gCurve);
+    dot[q]=el("circle",{r:q==="V"?6:4.5,fill:C[q],stroke:"var(--panel)","stroke-width":2},gCurve);
+  });
+  const arcWt=el("path",{fill:"var(--arc)",opacity:.5},gArc);
+  const arcPh=el("path",{fill:"none",stroke:"var(--v)","stroke-width":1.6},gArc);
+  const lblPh=txt("φ",0,0,{"font-size":18},gArc);
+  const vec={};
+  ["I","R","L","C","X","V"].forEach(q=>{
+    const isX=q==="X";
+    vec[q]=el("line",{stroke:isX?"var(--muted)":C[q],"stroke-width":q==="V"?4.5:(q==="I"?3:3.6),"stroke-dasharray":isX?"7 5":"none","marker-end":isX?"":"url(#ah"+q+")","stroke-linecap":"round"},gVec);
+  });
+  const stair={}; ["R","L","C"].forEach(q=>stair[q]=el("line",{stroke:C[q],"stroke-width":6,"stroke-linecap":"round"},gStair));
+  const stairH=[0,1,2].map(()=>el("line",{stroke:"var(--muted)","stroke-width":1},gStair));
+  const stairLbl=txt("和",0,0,{"font-size":14,style:"font-style:normal;fill:var(--muted)"},gStair);
+  const lbl={};
+  function sub(e,main,s){e.innerHTML=main+'<tspan font-size="12" dy="4" style="font-style:normal">'+s+'</tspan>';}
+  ["I","R","L","C","V"].forEach(q=>{lbl[q]=txt("",0,0,{"font-size":19,style:"fill:"+C[q]},gLbl);});
+  lbl.I.textContent="I"; sub(lbl.R,"V","R"); sub(lbl.L,"V","L"); sub(lbl.C,"V","C"); sub(lbl.V,"V","0");
+  const lblX=txt("",0,0,{"font-size":14,style:"fill:var(--muted)"},gLbl);
+  lblX.innerHTML='V<tspan font-size="10" dy="3" style="font-style:normal">L0</tspan><tspan dy="-3">−V</tspan><tspan font-size="10" dy="3" style="font-style:normal">C0</tspan>';
+  const fV=txt("",xEnd-170,30,{"font-size":16},gLbl);
+  fV.innerHTML='v = V<tspan font-size="11" dy="4" style="font-style:normal">0</tspan><tspan dy="-4"> sin(ωt + φ)</tspan>';
+
+  const P=(x,y)=>[cx+x*S,cy-y*S];      // phasor coords (volts) -> screen
+  const pathOf=(f,a0,a1,scale)=>{let d="";for(let a=a0;a<=a1+1e-9;a+=0.02){const y=cy-scale*f(a);d+=(d?"L":"M")+(x0+k*a).toFixed(1)+","+y.toFixed(1);}return d;};
+  const deg=r=>r*180/Math.PI;
+
+  function funcs(){const X=VL-VC;return{
+    R:a=>VR*Math.sin(a), L:a=>VL*Math.cos(a), C:a=>-VC*Math.cos(a),
+    V:a=>VR*Math.sin(a)+X*Math.cos(a), I:a=>Math.sin(a)};}
+
+  function labelAt(e,x,y,dirx,diry){set(e,{x:x+dirx*16-8,y:y-diry*16+6});}
+
+  function render(){
+    const F=funcs(), X=VL-VC, V0=Math.hypot(VR,X), phi=Math.atan2(X,VR);
+    const c=Math.cos(theta), s=Math.sin(theta);
+    const u=[c,s], n=[-s,c];
+    const add=(p,v,m)=>[p[0]+v[0]*m,p[1]+v[1]*m];
+    const O=[0,0], tR=add(O,u,VR), tL0=add(O,n,VL), tC0=add(O,n,-VC), tX=add(O,n,X), tV=add(tR,n,X);
+    let a,b,cc;
+    if(draw==="chain"){a=[O,tR]; b=[tR,add(tR,n,VL)]; cc=[add(tR,n,VL),tV];}
+    else{a=[O,tR]; b=[O,tL0]; cc=[O,tC0];}
+    const seg=(e,p,q,on,trim,off)=>{e.style.display=on?"":"none";const A=P(...p),B=P(...q);if(off){A[0]+=off[0];A[1]+=off[1];B[0]+=off[0];B[1]+=off[1];}const L=Math.hypot(B[0]-A[0],B[1]-A[1]);const t=L>6?(L-(trim||3))/L:1;set(e,{x1:A[0],y1:A[1],x2:A[0]+(B[0]-A[0])*t,y2:A[1]+(B[1]-A[1])*t});};
+    seg(vec.R,a[0],a[1],show.R&&VR>0.5); seg(vec.L,b[0],b[1],show.L&&VL>0.5); const offC=draw==="chain"?[u[0]*8,-u[1]*8]:null; seg(vec.C,cc[0],cc[1],show.C&&VC>0.5,3,offC);
+    seg(vec.V,O,tV,show.V&&V0>0.5,4);
+    seg(vec.X,O,tX,draw==="origin"&&show.V&&Math.abs(X)>0.5&&(show.L||show.C),0);
+    const iTip=[c*IS/S,s*IS/S]; seg(vec.I,O,iTip,show.I);
+    // helper rectangle (origin mode)
+    const hp=[[tR,tV],[tX,tV]];
+    helpers.forEach((h,j)=>{const on=draw==="origin"&&show.V&&j<2;h.style.display=on?"":"none";if(on){const A=P(...hp[j][0]),B=P(...hp[j][1]);set(h,{x1:A[0],y1:A[1],x2:B[0],y2:B[1]});}});
+    set(circV,{r:V0*S}); circV.style.display=show.V?"":"none";
+    // labels
+    const L=(e,tip,dir,on)=>{e.style.display=on?"":"none";const T=P(...tip);labelAt(e,T[0],T[1],dir[0],dir[1]);};
+    L(lbl.R,a[1],[u[0]*0.4-n[0]*1,u[1]*0.4-n[1]*1],show.R&&VR>0.5);
+    L(lbl.L,b[1],draw==="chain"?[u[0],u[1]]:[n[0],n[1]],show.L&&VL>0.5);
+    if(draw==="chain"){lbl.C.style.display=show.C&&VC>0.5?"":"none";const M=P((cc[0][0]+cc[1][0])/2,(cc[0][1]+cc[1][1])/2);set(lbl.C,{x:M[0]+u[0]*26-8,y:M[1]-u[1]*26+6});}
+    else L(lbl.C,cc[1],[-n[0],-n[1]],show.C&&VC>0.5);
+    const vd=V0>0?[tV[0]/V0,tV[1]/V0]:[1,0]; lbl.V.style.display=show.V?"":"none";
+    {const M=P(tV[0]*0.55,tV[1]*0.55), px=-vd[1], py=vd[0]; set(lbl.V,{x:M[0]+px*20-8,y:M[1]-py*20+6});}
+    L(lbl.I,iTip,[-n[0]*0.9,-n[1]*0.9],show.I);
+    lblX.style.display=vec.X.style.display; {const T=P(...tX); set(lblX,{x:T[0]-n[0]*0+(-u[0])*34-18,y:T[1]+u[1]*34+5});}
+    // arcs
+    const wa=((theta%(2*Math.PI))+2*Math.PI)%(2*Math.PI), r1=24;
+    if(wa<0.01) arcWt.setAttribute("d",""); else {const e=[cx+r1*Math.cos(wa),cy-r1*Math.sin(wa)];arcWt.setAttribute("d",`M${cx},${cy} L${cx+r1},${cy} A${r1},${r1} 0 ${wa>Math.PI?1:0} 0 ${e[0]},${e[1]} Z`);}
+    const r2=46, on=show.V&&show.I&&Math.abs(phi)>0.05&&V0>1;
+    arcPh.style.display=lblPh.style.display=on?"":"none";
+    if(on){const a1=theta,a2=theta+phi,sweep=phi>0?0:1;
+      arcPh.setAttribute("d",`M${cx+r2*Math.cos(a1)},${cy-r2*Math.sin(a1)} A${r2},${r2} 0 0 ${sweep} ${cx+r2*Math.cos(a2)},${cy-r2*Math.sin(a2)}`);
+      const am=theta+phi/2; set(lblPh,{x:cx+(r2+13)*Math.cos(am)-5,y:cy-(r2+13)*Math.sin(am)+6});}
+    // curves
+    const gx=x0+k*theta;
+    ["I","R","L","C","V"].forEach(q=>{
+      const sc=q==="I"?IS:S, on=show[q];
+      ghost[q].style.display=trace[q].style.display=dot[q].style.display=on?"":"none";
+      if(!on) return;
+      ghost[q].setAttribute("d",pathOf(F[q],0,TMAX,sc));
+      trace[q].setAttribute("d",pathOf(F[q],0,theta,sc)+`L${gx},${cy-sc*F[q](theta)}`);
+      set(dot[q],{cx:gx,cy:cy-sc*F[q](theta)});
+    });
+    set(cursor,{x1:gx,y1:20,x2:gx,y2:400});
+    // staircase: vR, then +vL, then +vC
+    const vR=F.R(theta), vL=F.L(theta), vC=F.C(theta), lv=[0,vR,vR+vL,vR+vL+vC];
+    const sx=[gx+12,gx+22,gx+32];
+    ["R","L","C"].forEach((q,j)=>{set(stair[q],{x1:sx[j],y1:cy-lv[j]*S,x2:sx[j],y2:cy-lv[j+1]*S});});
+    stairH.forEach((h,j)=>{const x1=j===0?gx:sx[j-1],x2=sx[j];set(h,{x1,y1:cy-lv[j]*S,x2,y2:cy-lv[j]*S});});
+    set(stairLbl,{x:sx[2]+6,y:cy-lv[3]*S+5});
+    // projections
+    const pr=(e,tip,x2,on)=>{e.style.display=on?"":"none";const T=P(...tip);set(e,{x1:T[0],y1:T[1],x2,y2:T[1]});};
+    if(draw==="chain"){
+      pr(proj.p1,a[1],sx[1],true); pr(proj.p2,b[1],sx[2],true);
+      pr(proj.R,O,0,false);pr(proj.L,O,0,false);pr(proj.C,O,0,false);
+    }else{
+      pr(proj.p1,O,0,false);pr(proj.p2,O,0,false);
+      pr(proj.R,tR,gx,show.R&&VR>0.5);pr(proj.L,tL0,gx,show.L&&VL>0.5);pr(proj.C,tC0,gx,show.C&&VC>0.5);
+    }
+    pr(proj.V,tV,gx,show.V);
+    // text
+    const f=v=>(v>=-0.05?"+":"−")+Math.abs(v).toFixed(1)+" V";
+    document.getElementById("tR").textContent=f(vR);document.getElementById("tL").textContent=f(vL);
+    document.getElementById("tC").textContent=f(vC);document.getElementById("tS").textContent=f(vR+vL+vC);
+    document.getElementById("tV").textContent=f(V0*Math.sin(theta+phi));
+    document.getElementById("theta").value=Math.round(theta/TMAX*1000);
+  }
+
+  function updateParams(){
+    VR=+pR.value; VL=+pL.value; VC=+pC.value;
+    oR.textContent=VR+" Ω"; oL.textContent=VL+" Ω"; oC.textContent=VC+" Ω";
+    const X=VL-VC, Z=Math.hypot(VR,X), phi=Math.atan2(X,VR);
+    document.getElementById("zText").innerHTML=`<span class="m">Z</span> = √(<span class="m">R</span>² + (<span class="m">ωL</span> − 1/<span class="m">ωC</span>)²) = √(${VR}² + ${X<0?"("+X+")":X}²) = <b>${Z.toFixed(1)} Ω</b>`;
+    document.getElementById("vText").innerHTML=`<span class="m">V</span><sub>0</sub> = √(<span class="m">V</span><sub>R0</sub>² + (<span class="m">V</span><sub>L0</sub> − <span class="m">V</span><sub>C0</sub>)²) = <span class="m">Z I</span><sub>0</sub> = ${Z.toFixed(1)} V`;
+    let rel = Math.abs(phi)<0.005 ? "電圧と電流は同位相（共振）" : (phi>0?"電圧が電流より進む":"電圧が電流より遅れる");
+    document.getElementById("phText").innerHTML=`tan <span class="m">φ</span> = (<span class="m">ωL</span> − 1/<span class="m">ωC</span>)/<span class="m">R</span> → <span class="m">φ</span> = ${deg(phi).toFixed(1)}°（${rel}）`;
+    render();
+  }
+  const pR=document.getElementById("pR"),pL=document.getElementById("pL"),pC=document.getElementById("pC");
+  const oR=document.getElementById("oR"),oL=document.getElementById("oL"),oC=document.getElementById("oC");
+  [pR,pL,pC].forEach(e=>e.addEventListener("input",updateParams));
+  ["R","L","C","V","I"].forEach(q=>document.getElementById("s"+q).addEventListener("change",e=>{show[q]=e.target.checked;render();}));
+  document.querySelectorAll("[data-draw]").forEach(b=>b.addEventListener("click",()=>{draw=b.dataset.draw;document.querySelectorAll("[data-draw]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));render();}));
+  const playBtn=document.getElementById("play"); let last=null;
+  function setPlay(p){playing=p;playBtn.textContent=p?"❚❚ 一時停止":"▶ 再生";last=null;}
+  playBtn.addEventListener("click",()=>setPlay(!playing));
+  document.getElementById("spd").addEventListener("change",e=>period=+e.target.value);
+  document.getElementById("zero").addEventListener("click",()=>{setPlay(false);theta=0;render();});
+  document.getElementById("theta").addEventListener("input",e=>{setPlay(false);theta=e.target.value/1000*TMAX;render();});
+
+  function svgPt(ev){const p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+  let dragging=false;
+  function dragTo(ev){const p=svgPt(ev);
+    if(p.x>=x0-10){theta=Math.min(TMAX,Math.max(0,(p.x-x0)/k));}
+    else{let a=Math.atan2(cy-p.y,p.x-cx); a=((a%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+      const turn=Math.floor(theta/(2*Math.PI)); let t2=turn*2*Math.PI+a;
+      if(t2-theta>Math.PI)t2-=2*Math.PI; if(theta-t2>Math.PI)t2+=2*Math.PI;
+      theta=Math.min(TMAX,Math.max(0,t2));}
+    render();}
+  svg.addEventListener("pointerdown",ev=>{dragging=true;setPlay(false);svg.setPointerCapture(ev.pointerId);dragTo(ev);});
+  svg.addEventListener("pointermove",ev=>{if(dragging)dragTo(ev);});
+  svg.addEventListener("pointerup",()=>dragging=false);svg.addEventListener("pointercancel",()=>dragging=false);
+
+  function loop(ts){if(playing){if(last!==null){theta+=(ts-last)/1000*(2*Math.PI/period);if(theta>TMAX)theta=0;}last=ts;render();}else last=null;requestAnimationFrame(loop);}
+  setPlay(playing); if(!playing) theta=Math.PI/6;
+  updateParams(); requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
